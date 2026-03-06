@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ATOM OPS · Vale</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Figtree:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070608;--s1:#0F0D12;--s2:#151320;--s3:#1C1A2A;
+  --border:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
+  --text:#ECF0F8;--muted:#4E4870;--m2:#7B78A0;
+  --red:#E8390E;--green:#22C55E;--amber:#F59E0B;--blue:#3B82F6;--violet:#8B5CF6;
+  --f:'Figtree',sans-serif;--d:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f);overflow:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sb{width:200px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.sb-h{padding:14px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.sb-logo{width:34px;height:34px;background:var(--violet);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--d);font-size:17px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-nm{font-family:var(--d);font-size:13px;font-weight:700}
+.sb-rl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#C4B5FD;background:rgba(139,92,246,.1);border-radius:4px;padding:2px 7px;display:inline-block}
+.sb-nav{flex:1;padding:8px;overflow-y:auto;scrollbar-width:none}
+.sb-sec{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:9px 8px 4px}
+.si{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:1px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:.15s}
+.si:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.si.on{background:rgba(139,92,246,.1);color:#fff;font-weight:700}
+.si .ic{width:16px;text-align:center;font-size:12px;flex-shrink:0}
+.si .badge{margin-left:auto;min-width:17px;height:16px;border-radius:4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px}
+.sb-f{padding:12px;border-top:1px solid var(--border)}
+.sb-u{display:flex;align-items:center;gap:8px}
+.sb-av{width:30px;height:30px;border-radius:50%;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#C4B5FD;flex-shrink:0}
+.sb-un{font-size:11px;font-weight:600}
+.sb-us{font-size:10px;color:var(--muted)}
+.lo{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(7,6,8,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:50px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-t{font-family:var(--d);font-size:14px;font-weight:700}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-clk{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.live{display:flex;align-items:center;gap:5px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;color:#C4B5FD}
+.ld{width:6px;height:6px;border-radius:50%;background:#A78BFA;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* PANELS */
+.pnl{display:none;padding:20px;flex-direction:column;gap:16px;animation:fi .2s ease}
+.pnl.on{display:flex}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--m2);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;font-family:var(--f);display:inline-flex;align-items:center;gap:5px}
+.btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.btn.pr{background:var(--violet);border-color:var(--violet);color:#fff;box-shadow:0 4px 14px rgba(139,92,246,.3)}
+.btn.pr:hover{background:#7c3aed}
+.btn.gr{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.2);color:#4ADE80}
+.btn.am{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.15);color:#FCD34D}
+.btn.dn{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.15);color:#FCA5A5}
+
+/* PAGE HEAD */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.ph h2{font-family:var(--d);font-size:17px;font-weight:800}
+.ph p{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sc{background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:14px;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sr::after{background:var(--red)}.sg::after{background:var(--green)}.sa::after{background:var(--amber)}.sv::after{background:var(--violet)}
+.sl{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.svl{font-family:var(--mono);font-size:22px;font-weight:600;margin-bottom:2px}
+.sd{font-size:10px;color:var(--muted)}
+
+/* PLAKA GİRİŞİ */
+.plaka-form{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:500px}
+.plaka-display{background:rgba(255,255,255,.04);border:2px solid var(--violet);border-radius:14px;padding:20px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden}
+.plaka-display::before{content:'🇹🇷';position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:24px}
+.plaka-display::after{content:'TR';position:absolute;left:16px;bottom:8px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3)}
+.plaka-input{background:transparent;border:none;outline:none;font-family:var(--mono);font-size:32px;font-weight:700;color:var(--text);text-align:center;letter-spacing:6px;text-transform:uppercase;width:100%;padding-left:40px}
+.plaka-input::placeholder{color:rgba(255,255,255,.15);letter-spacing:4px}
+.plaka-sub{font-size:10px;color:var(--muted);margin-top:6px;text-align:center}
+.plaka-extras{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.fl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:var(--f);font-size:13px;outline:none;transition:.15s}
+.fi:focus{border-color:rgba(139,92,246,.4)}
+.plaka-submit{width:100%;padding:14px;border:none;border-radius:12px;background:var(--violet);color:#fff;font-family:var(--d);font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.3px;box-shadow:0 4px 20px rgba(139,92,246,.35);transition:.2s}
+.plaka-submit:hover{background:#7c3aed;transform:translateY(-1px)}
+
+/* KUYRUK */
+.queue-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.queue-title{font-family:var(--d);font-size:14px;font-weight:700}
+.queue-count{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--violet)}
+
+.queue-list{display:flex;flex-direction:column;gap:10px}
+.qcard{border-radius:14px;border:1px solid var(--border);background:var(--s1);overflow:hidden;transition:.2s}
+.qcard:hover{border-color:var(--b2)}
+.qcard.bekliyor{border-left:3px solid var(--amber)}
+.qcard.hazirlaniyor{border-left:3px solid var(--blue)}
+.qcard.hazir{border-left:3px solid var(--green);animation:ready-pulse 2s infinite}
+@keyframes ready-pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.25)}50%{box-shadow:0 0 0 6px transparent}}
+.qcard.teslim{opacity:.5;border-left:3px solid var(--muted)}
+.qcard-head{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.q-sira{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--violet);background:rgba(139,92,246,.12);border-radius:5px;padding:2px 8px;flex-shrink:0}
+.q-plaka{font-family:var(--mono);font-size:18px;font-weight:700;letter-spacing:3px;flex:1}
+.q-status{font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px}
+.qs-bekliyor{background:rgba(245,158,11,.1);color:#FCD34D}
+.qs-hazirlaniyor{background:rgba(59,130,246,.1);color:#93C5FD}
+.qs-hazir{background:rgba(34,197,94,.1);color:#86EFAC}
+.qs-teslim{background:rgba(100,116,139,.1);color:#94A3B8}
+.q-timer{font-family:var(--mono);font-size:11px;margin-left:auto;flex-shrink:0}
+.qt-warn{color:var(--amber)}.qt-ok{color:var(--m2)}
+.qcard-body{padding:12px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.q-info{flex:1}
+.q-masa{font-size:12px;font-weight:700;margin-bottom:2px}
+.q-detail{font-size:11px;color:var(--muted);line-height:1.7}
+.q-park{font-family:var(--mono);font-size:11px;color:var(--violet);margin-top:4px;font-weight:600}
+.qcard-foot{padding:10px 16px;border-top:1px solid rgba(255,255,255,.04);display:flex;gap:7px;flex-wrap:wrap}
+.qb{padding:6px 12px;border-radius:7px;border:none;font-family:var(--f);font-size:11px;font-weight:700;cursor:pointer;transition:.15s}
+.qb-start{background:rgba(59,130,246,.12);color:#93C5FD;border:1px solid rgba(59,130,246,.2)}
+.qb-ready{background:rgba(34,197,94,.1);color:#86EFAC;border:1px solid rgba(34,197,94,.2)}
+.qb-notify{background:rgba(139,92,246,.1);color:#C4B5FD;border:1px solid rgba(139,92,246,.2)}
+.qb-deliver{background:rgba(34,197,94,.15);color:#4ADE80;border:1px solid rgba(34,197,94,.3)}
+.qb-cancel{background:rgba(239,68,68,.06);color:#FCA5A5;border:1px solid rgba(239,68,68,.15)}
+.qb-wa{background:rgba(34,197,94,.08);color:#86EFAC;border:1px solid rgba(34,197,94,.2)}
+
+/* ARAÇ TAKİP MAP */
+.park-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.park-slot{aspect-ratio:1.6;border-radius:10px;border:1px solid var(--border);background:var(--s1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:.2s;position:relative}
+.park-slot:hover{border-color:var(--b2)}
+.park-slot.dolu{border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.07)}
+.park-slot.hazir{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.06);animation:park-ready 2s infinite}
+@keyframes park-ready{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.25)}50%{box-shadow:0 0 0 5px transparent}}
+.park-slot.bos{opacity:.5}
+.ps-no{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+.ps-ico{font-size:20px}
+.ps-plaka{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--violet)}
+.ps-status{font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px}
+.pss-d{background:rgba(139,92,246,.15);color:#C4B5FD}
+.pss-h{background:rgba(34,197,94,.12);color:#86EFAC}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--s2);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 18px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* NOTIF DOT */
+.notif-wrap{position:relative}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--bg)}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px}
+.mbg.open{display:flex}
+.mod{background:#100E18;border:1px solid rgba(255,255,255,.1);border-radius:18px;width:100%;max-width:440px;overflow:hidden}
+.mh{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mh h3{font-family:var(--d);font-size:14px;font-weight:700}
+.mx{width:28px;height:28px;border-radius:7px;border:none;background:rgba(255,255,255,.07);color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.mb{padding:18px;display:flex;flex-direction:column;gap:12px}
+.mf{padding:0 18px 18px;display:flex;gap:8px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-h">
+    <div class="sb-brand">
+      <div class="sb-logo">V</div>
+      <div><div class="sb-nm">ATOM OPS</div><div style="font-size:10px;color:var(--muted)">Vale Paneli</div></div>
+    </div>
+    <div class="sb-rl">🚗 VALE</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Operasyon</div>
+    <div class="si on" onclick="sw('kuyruk',this)"><span class="ic">🚗</span>Araç Kuyruk<span class="badge" id="sbbadge">0</span></div>
+    <div class="si" onclick="sw('plaka',this)"><span class="ic">🔑</span>Plaka Girişi</div>
+    <div class="si" onclick="sw('park',this)"><span class="ic">🅿️</span>Park Haritası</div>
+    <div class="si" onclick="sw('gecmis',this)"><span class="ic">📋</span>Geçmiş</div>
+  </nav>
+  <div class="sb-f">
+    <div class="sb-u">
+      <div class="sb-av">V</div>
+      <div><div class="sb-un">Vale 1</div><div class="sb-us">Aktif</div></div>
+      <button class="lo" onclick="location.href='ops-login.html'" title="Çıkış">⎋</button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-t" id="topT">Araç Kuyruk</span>
+    <div class="tb-r">
+      <div class="live"><div class="ld"></div>CANLI</div>
+      <span class="tb-clk" id="clk">--:--</span>
+      <button class="btn" onclick="sw('plaka',document.querySelectorAll('.si')[1])" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.2);color:#C4B5FD">🔑 Araç Al</button>
+      <button class="lo" onclick="location.href='ops-login.html'">⎋</button>
+    </div>
+  </div>
+
+  <!-- ═══ KUYRUK ═══ -->
+  <div class="pnl on" id="pnl-kuyruk">
+    <div class="ph">
+      <div><h2>Araç Kuyruk Yönetimi</h2><p>Sıra takip · Anlık durum · Müşteri bildirim</p></div>
+    </div>
+    <div class="stat-row" id="statsRow"></div>
+    <div class="queue-header">
+      <span class="queue-title">Aktif Araçlar</span>
+      <span class="queue-count" id="queueCount">0</span>
+    </div>
+    <div class="queue-list" id="queueList"></div>
+  </div>
+
+  <!-- ═══ PLAKA GİRİŞİ ═══ -->
+  <div class="pnl" id="pnl-plaka">
+    <div class="ph"><div><h2>Plaka Girişi</h2><p>Yeni araç kayıt · Müşteri bağla</p></div></div>
+    <div class="plaka-form">
+      <div class="plaka-display">
+        <input class="plaka-input" id="plakaInput" maxlength="10" placeholder="34 ABC 123" oninput="this.value=this.value.toUpperCase()">
+        <div class="plaka-sub">Türkiye plakaları için standart format</div>
+      </div>
+      <div class="plaka-extras">
+        <div><div class="fl">Masa No</div><input class="fi" id="masaNo" placeholder="5"></div>
+        <div><div class="fl">Araç Rengi/Modeli</div><input class="fi" id="aracModel" placeholder="Beyaz BMW"></div>
+      </div>
+      <div><div class="fl">Müşteri Telefon (WA bildirim için)</div><input class="fi" id="musteriTel" type="tel" placeholder="0532 000 00 00" style="margin-bottom:14px"></div>
+      <div><div class="fl">Park Yeri</div>
+        <select class="fi" id="parkYeri" style="margin-bottom:16px">
+          <option value="">Seç...</option>
+          ${Array.from({length:20},(_,i)=>`<option value="P${i+1}">P${i+1}</option>`).join('')}
+        </select>
+      </div>
+      <button class="plaka-submit" onclick="aracKaydet()">🚗 Araç Kaydet</button>
+    </div>
+  </div>
+
+  <!-- ═══ PARK HARİTASI ═══ -->
+  <div class="pnl" id="pnl-park">
+    <div class="ph"><div><h2>Park Haritası</h2><p>P1–P20 · Dolu/boş görsel takip</p></div>
+      <div style="display:flex;gap:10px;font-size:11px;align-items:center">
+        <span>🟣 Dolu</span><span>🟢 Hazır</span><span>⬜ Boş</span>
+      </div>
+    </div>
+    <div class="park-grid" id="parkGrid"></div>
+  </div>
+
+  <!-- ═══ GEÇMİŞ ═══ -->
+  <div class="pnl" id="pnl-gecmis">
+    <div class="ph"><div><h2>Teslim Geçmişi</h2><p>Bugün teslim edilen araçlar</p></div></div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="padding:9px 14px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--s2);border-bottom:1px solid var(--border)">Plaka</th>
+          <th style="padding:9px 14px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--s2);border-bottom:1px solid var(--border)">Masa</th>
+          <th style="padding:9px 14px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--s2);border-bottom:1px solid var(--border)">Giriş</th>
+          <th style="padding:9px 14px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--s2);border-bottom:1px solid var(--border)">Teslim</th>
+          <th style="padding:9px 14px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--s2);border-bottom:1px solid var(--border)">Süre</th>
+        </tr></thead>
+        <tbody id="gecmisBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- CALL MODAL (müşteri çağırdığında) -->
+<div class="mbg" id="callMod" onclick="">
+  <div class="mod">
+    <div class="mh"><h3 id="callTitle">🔔 Vale Çağrısı</h3><button class="mx" onclick="closeMod('callMod')">✕</button></div>
+    <div class="mb">
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:60px;margin-bottom:12px;animation:blink .6s infinite">🚨</div>
+        <div style="font-family:var(--d);font-size:22px;font-weight:800;margin-bottom:6px" id="callMasa">Masa 5</div>
+        <div style="font-size:13px;color:var(--muted)">Müşteri araç talep ediyor</div>
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--violet);margin-top:12px;letter-spacing:4px" id="callPlaka">34 ABC 123</div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" style="flex:1;justify-content:center" onclick="closeMod('callMod')">Daha Sonra</button>
+      <button class="btn pr" style="flex:2;justify-content:center" onclick="startPrep()">🚗 Hazırlamaya Başla</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ── DATA ──
+let QUEUE = [
+  {id:1,plaka:'34 ABC 123',masa:'Masa 2',model:'Beyaz BMW 3',tel:'0532 xxx xxxx',park:'P3',status:'hazirlaniyor',elapsed:420,sira:1},
+  {id:2,plaka:'06 DEF 456',masa:'Masa 5',model:'Gri Toyota',tel:'0541 xxx xxxx',park:'P7',status:'bekliyor',elapsed:0,sira:2},
+  {id:3,plaka:'35 GHI 789',masa:'VIP Salon',model:'Siyah Mercedes',tel:'0543 xxx xxxx',park:'P1',status:'hazir',elapsed:900,sira:3},
+  {id:4,plaka:'34 JKL 012',masa:'Masa 3',model:'Kırmızı Honda',tel:'0538 xxx xxxx',park:'P12',status:'bekliyor',elapsed:0,sira:4},
+];
+
+const GECMIS = [
+  {plaka:'41 MNO 345',masa:'Masa 7',giris:'18:14',teslim:'20:32',sure:'2sa 18dk'},
+  {plaka:'34 PQR 678',masa:'Masa 1',giris:'17:05',teslim:'19:45',sure:'2sa 40dk'},
+  {plaka:'16 STU 901',masa:'Bahçe A1',giris:'16:30',teslim:'18:50',sure:'2sa 20dk'},
+];
+
+let PARK_SLOTS = Array.from({length:20},(_,i)=>({
+  id:i+1,no:'P'+(i+1),
+  status:i<4?'dolu':i===4?'hazir':'bos',
+  plaka:i===0?'35 GHI':i===1?'34 ABC':i===2?'06 DEF':i===3?'34 JKL':i===4?'35 GHI':''
+}));
+
+// ── TIMERS ──
+setInterval(()=>{
+  QUEUE.filter(q=>q.status==='hazirlaniyor').forEach(q=>q.elapsed++);
+  renderQueue();
+},1000);
+
+function fmtTime(s){ const m=Math.floor(s/60); return m>0?m+'dk ':''+(s%60)+'sn'; }
+
+// ── RENDER STATS ──
+function renderStats(){
+  const bekleyen=QUEUE.filter(q=>q.status==='bekliyor').length;
+  const hazirlaniyor=QUEUE.filter(q=>q.status==='hazirlaniyor').length;
+  const hazir=QUEUE.filter(q=>q.status==='hazir').length;
+  const toplam=QUEUE.length;
+  document.getElementById('statsRow').innerHTML=`
+    <div class="sc sv"><div class="sl">Toplam Araç</div><div class="svl" style="color:#C4B5FD">${toplam}</div><div class="sd">Aktif kuyruk</div></div>
+    <div class="sc sa"><div class="sl">Bekleyen</div><div class="svl" style="color:#FCD34D">${bekleyen}</div><div class="sd">Henüz başlanmadı</div></div>
+    <div class="sc" style="border-top:2px solid var(--blue);"><div class="sl">Hazırlanıyor</div><div class="svl" style="color:#93C5FD">${hazirlaniyor}</div><div class="sd">Yolda</div></div>
+    <div class="sc sg"><div class="sl">Hazır</div><div class="svl" style="color:#4ADE80">${hazir}</div><div class="sd">Müşteri bekliyor</div></div>`;
+  document.getElementById('queueCount').textContent=toplam;
+  document.getElementById('sbbadge').textContent=bekleyen+hazir;
+}
+
+// ── RENDER QUEUE ──
+function renderQueue(){
+  renderStats();
+  const sorted = [...QUEUE].sort((a,b)=>a.sira-b.sira);
+  document.getElementById('queueList').innerHTML = sorted.map(q=>`
+    <div class="qcard ${q.status}">
+      <div class="qcard-head">
+        <span class="q-sira">#${q.sira}</span>
+        <span class="q-plaka">${q.plaka}</span>
+        <span class="q-status qs-${q.status}">${
+          q.status==='bekliyor'?'⏳ Bekliyor':
+          q.status==='hazirlaniyor'?'🔵 Hazırlanıyor':
+          q.status==='hazir'?'✅ HAZIR':'✓ Teslim'
+        }</span>
+        ${q.status==='hazirlaniyor'?`<span class="q-timer qt-${q.elapsed>300?'warn':'ok'}">${fmtTime(q.elapsed)}</span>`:''}
+      </div>
+      <div class="qcard-body">
+        <div class="q-info">
+          <div class="q-masa">🪑 ${q.masa} · 🚗 ${q.model}</div>
+          <div class="q-detail">📞 ${q.tel}</div>
+          <div class="q-park">🅿️ ${q.park}</div>
+        </div>
+      </div>
+      <div class="qcard-foot">
+        ${q.status==='bekliyor'?`<button class="qb qb-start" onclick="setStatus(${q.id},'hazirlaniyor')">🔵 Hazırlamaya Başla</button>`:''}
+        ${q.status==='hazirlaniyor'?`<button class="qb qb-ready" onclick="setStatus(${q.id},'hazir')">✅ Hazır</button>`:''}
+        ${q.status==='hazir'?`
+          <button class="qb qb-notify" onclick="notifyCustomer(${q.id})">📱 Müşteriye Bildir</button>
+          <button class="qb qb-deliver" onclick="setStatus(${q.id},'teslim')">🔑 Teslim Et</button>
+        `:''}
+        <button class="qb qb-wa" onclick="sendWA('${q.tel}','${q.plaka}','${q.status}')">📱 WA</button>
+        ${q.status!=='teslim'?`<button class="qb qb-cancel" onclick="removeQueue(${q.id})">✕</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function setStatus(id, status){
+  const q=QUEUE.find(x=>x.id===id);
+  q.status=status;
+  if(status==='hazir'){
+    notifyCustomer(id);
+  }
+  if(status==='teslim'){
+    setTimeout(()=>{
+      QUEUE=QUEUE.filter(x=>x.id!==id);
+      renderQueue();
+    },2000);
+    toast(`🔑 ${q.plaka} teslim edildi`);
+  }
+  renderQueue();
+}
+
+function removeQueue(id){ QUEUE=QUEUE.filter(x=>x.id!==id); renderQueue(); toast('🚗 Araç kuyruktan çıkarıldı'); }
+
+function notifyCustomer(id){
+  const q=QUEUE.find(x=>x.id===id);
+  const msg=encodeURIComponent(`Sayın müşterimiz,\n🚗 Aracınız (${q.plaka}) önünüzde hazır bekliyor!\n\n✅ Park yerinden alındı: ${q.park}\nATOM Kumpir & Waffle Vale Servisi 🙏`);
+  window.open(`https://api.whatsapp.com/send?phone=${q.tel.replace(/\D/g,'').replace('0','90')}&text=${msg}`,'_blank');
+  toast(`📱 ${q.plaka} - müşteri WhatsApp ile bildirildi`);
+}
+
+function sendWA(tel, plaka, status){
+  const msgs={
+    bekliyor:`Araç (${plaka}) teslim alındı. En kısa sürede hazırlanacak.`,
+    hazirlaniyor:`Aracınız (${plaka}) hazırlanıyor, yakında hazır!`,
+    hazir:`🚗 Aracınız (${plaka}) önünüzde hazır bekliyor!`,
+  };
+  const msg=encodeURIComponent((msgs[status]||`Aracınız (${plaka}) ile ilgili bilgi`)+'\nATOM Kumpir & Waffle');
+  window.open(`https://api.whatsapp.com/send?phone=905359777275&text=${msg}`,'_blank');
+}
+
+function aracKaydet(){
+  const plaka=document.getElementById('plakaInput').value.trim();
+  const masa=document.getElementById('masaNo').value.trim();
+  const model=document.getElementById('aracModel').value.trim();
+  const tel=document.getElementById('musteriTel').value.trim();
+  const park=document.getElementById('parkYeri').value;
+  if(!plaka){toast('⚠️ Plaka zorunlu');return;}
+  const newQ={id:Date.now(),plaka,masa:'Masa '+(masa||'?'),model:model||'Belirtilmedi',tel:tel||'—',park:park||'P?',status:'bekliyor',elapsed:0,sira:QUEUE.length+1};
+  QUEUE.push(newQ);
+  // park slot güncelle
+  if(park){const slot=PARK_SLOTS.find(p=>p.no===park);if(slot){slot.status='dolu';slot.plaka=plaka.slice(0,6);}}
+  document.getElementById('plakaInput').value='';
+  document.getElementById('masaNo').value='';
+  document.getElementById('aracModel').value='';
+  document.getElementById('musteriTel').value='';
+  document.getElementById('parkYeri').value='';
+  sw('kuyruk',document.querySelectorAll('.si')[0]);
+  renderQueue();
+  renderPark();
+  toast(`✅ ${plaka} kuyruğa eklendi · ${park||'Park belirsiz'}`);
+}
+
+// ── PARK HARİTASI ──
+function renderPark(){
+  document.getElementById('parkGrid').innerHTML = PARK_SLOTS.map(s=>`
+    <div class="park-slot ${s.status}" onclick="toast('${s.status==='bos'?'P'+s.id+' boş':'P'+s.id+': '+s.plaka}')">
+      <div class="ps-no">P${s.id}</div>
+      <div class="ps-ico">${s.status==='bos'?'⬜':s.status==='hazir'?'🟢':'🚗'}</div>
+      ${s.plaka?`<div class="ps-plaka">${s.plaka}</div>`:''}
+      ${s.status!=='bos'?`<div class="ps-status ${s.status==='hazir'?'pss-h':'pss-d'}">${s.status==='hazir'?'HAZIR':'Dolu'}</div>`:''}
+    </div>`).join('');
+}
+
+// ── GEÇMİŞ ──
+function renderGecmis(){
+  document.getElementById('gecmisBody').innerHTML = GECMIS.map(g=>`<tr>
+    <td style="padding:11px 14px;font-family:var(--mono);font-size:13px;font-weight:600;border-bottom:1px solid var(--border)">${g.plaka}</td>
+    <td style="padding:11px 14px;font-size:12px;border-bottom:1px solid var(--border)">${g.masa}</td>
+    <td style="padding:11px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">${g.giris}</td>
+    <td style="padding:11px 14px;font-family:var(--mono);font-size:11px;color:var(--green);border-bottom:1px solid var(--border)">${g.teslim}</td>
+    <td style="padding:11px 14px;font-size:11px;font-weight:600;color:var(--violet);border-bottom:1px solid var(--border)">${g.sure}</td>
+  </tr>`).join('');
+}
+
+// ── PANEL SWITCH ──
+const TITLES={kuyruk:'Araç Kuyruk',plaka:'Plaka Girişi',park:'Park Haritası',gecmis:'Teslim Geçmişi'};
+function sw(id,el){
+  document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.si').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pnl-'+id).classList.add('on');
+  el.classList.add('on');
+  document.getElementById('topT').textContent=TITLES[id]||id;
+}
+
+// ── MODAL ──
+function startPrep(){
+  closeMod('callMod');
+  if(QUEUE.length){ setStatus(QUEUE.find(q=>q.status==='bekliyor')?.id,'hazirlaniyor'); }
+}
+function openMod(id){document.getElementById(id).classList.add('open')}
+function closeMod(id){document.getElementById(id).classList.remove('open')}
+
+// ── TOAST ──
+function toast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ── CLOCK ──
+setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});},1000);
+
+// ── localStorage broadcast (müşteri QR sayfasından vale çağrısı) ──
+window.addEventListener('storage',e=>{
+  if(e.key==='atom_broadcast'){
+    try{
+      const d=JSON.parse(e.newValue);
+      if(d.type==='vale'){
+        document.getElementById('callMasa').textContent='Masa '+d.masa;
+        const q=QUEUE.find(x=>x.masa==='Masa '+d.masa);
+        document.getElementById('callPlaka').textContent=q?q.plaka:'—';
+        openMod('callMod');
+        toast('🔔 Masa '+d.masa+' vale istiyor!');
+      }
+    }catch(err){}
+  }
+});
+
+// ── INIT ──
+renderQueue();
+renderPark();
+renderGecmis();
+</script>
+</body>
+</html>

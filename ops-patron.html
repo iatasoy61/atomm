@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ATOM OPS · Patron</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Syne:wght@400;600;700;800&family=Figtree:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050507;--s1:#09090F;--s2:#0F0F1A;--s3:#151525;
+  --border:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
+  --text:#F0EEF8;--muted:#4A476A;--m2:#7874A0;
+  --gold:#D4AF37;--gold-dim:rgba(212,175,55,.1);--gold-glow:rgba(212,175,55,.25);
+  --red:#E8390E;--green:#22C55E;--blue:#3B82F6;--amber:#F59E0B;--violet:#8B5CF6;
+  --f:'Figtree',sans-serif;--d:'Syne',sans-serif;--display:'Cormorant Garamond',serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f);overflow:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* AMBIENT GLOW */
+body::before{content:'';position:fixed;width:800px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,175,55,.05) 0%,transparent 70%);
+  top:-100px;right:-200px;pointer-events:none;z-index:0}
+
+.shell{display:flex;height:100vh;position:relative;z-index:1;overflow:hidden}
+
+/* SIDEBAR */
+.sb{width:220px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.sb-h{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.sb-logo{width:40px;height:40px;background:linear-gradient(135deg,#C9A227,#E8C547);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;font-weight:700;color:#0a0800;flex-shrink:0;box-shadow:0 4px 16px rgba(212,175,55,.3)}
+.sb-nm{font-family:var(--display);font-size:17px;font-weight:600;color:var(--gold);letter-spacing:.3px}
+.sb-sub{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sb-rl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(212,175,55,.2);border-radius:4px;padding:3px 9px;display:inline-block}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;scrollbar-width:none}
+.sb-sec{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 8px 4px}
+.si{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:9px;margin-bottom:2px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:.15s}
+.si:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.si.on{background:var(--gold-dim);border:1px solid rgba(212,175,55,.2);color:var(--gold);font-weight:700}
+.si .ic{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+.sb-f{padding:14px;border-top:1px solid var(--border)}
+.sb-u{display:flex;align-items:center;gap:10px}
+.sb-av{width:34px;height:34px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(212,175,55,.3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sb-un{font-family:var(--display);font-size:13px;font-weight:600;color:var(--gold)}
+.sb-us{font-size:10px;color:var(--muted)}
+.lo{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,5,7,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:54px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-t{font-family:var(--display);font-size:18px;font-weight:600;color:var(--gold);letter-spacing:.3px}
+.tb-r{display:flex;align-items:center;gap:12px}
+.tb-clk{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.live{display:flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid rgba(212,175,55,.2);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--gold)}
+.ld{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* PANELS */
+.pnl{display:none;padding:24px;flex-direction:column;gap:20px;animation:fi .25s ease}
+.pnl.on{display:flex}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--m2);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;font-family:var(--f);display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.btn.gold{background:var(--gold-dim);border-color:rgba(212,175,55,.3);color:var(--gold)}
+.btn.gold:hover{background:rgba(212,175,55,.15)}
+
+/* PAGE HEAD */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.ph h2{font-family:var(--display);font-size:22px;font-weight:600;color:var(--gold);letter-spacing:.3px}
+.ph p{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:.2s}
+.kpi:hover{border-color:var(--b2)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi-g::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.kpi-r::before{background:var(--red)}.kpi-gr::before{background:var(--green)}.kpi-b::before{background:var(--blue)}.kpi-v::before{background:var(--violet)}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.kpi-value{font-family:var(--mono);font-size:22px;font-weight:600;margin-bottom:3px;line-height:1}
+.kpi-delta{font-size:10px;font-weight:600;margin-top:4px}
+.kpi-delta.up{color:var(--green)}.kpi-delta.dn{color:var(--red)}.kpi-delta.nt{color:var(--muted)}
+.kpi-sparkline{display:flex;align-items:flex-end;gap:2px;height:24px;margin-top:8px;opacity:.6}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:.4s}
+
+/* CHART SECTION */
+.chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.chart-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.ch{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ch h3{font-family:var(--d);font-size:12px;font-weight:700;letter-spacing:.3px}
+.ch .sub{font-size:10px;color:var(--muted)}
+.cb{padding:20px}
+
+/* BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:160px}
+.bc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.bc-bar-wrap{flex:1;width:100%;display:flex;align-items:flex-end}
+.bc-bar{width:100%;border-radius:5px 5px 0 0;transition:height .6s cubic-bezier(.2,0,.2,1);position:relative;cursor:pointer}
+.bc-bar:hover::after{content:attr(data-val);position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;color:var(--text);background:var(--s3);border-radius:4px;padding:2px 6px;white-space:nowrap}
+.bc-lbl{font-size:9px;color:var(--muted);font-weight:600}
+
+/* LINE CHART */
+.line-chart{position:relative;height:140px}
+.lc-svg{width:100%;height:100%}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-svg{flex-shrink:0}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:8px}
+.dl-item{display:flex;align-items:center;gap:8px}
+.dl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dl-name{font-size:11px;flex:1}
+.dl-pct{font-family:var(--mono);font-size:11px;font-weight:600}
+
+/* HEAT MAP */
+.heat-grid{display:grid;grid-template-columns:auto repeat(12,1fr);gap:4px;font-size:9px}
+.hg-label{color:var(--muted);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-weight:600}
+.hg-head{color:var(--muted);text-align:center;font-weight:600}
+.heat-cell{height:24px;border-radius:4px;transition:.2s;cursor:pointer}
+.heat-cell:hover{opacity:.8;transform:scale(1.1)}
+
+/* AI INSIGHTS */
+.insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.insight-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px;transition:.2s}
+.insight-card:hover{border-color:var(--b2)}
+.insight-type{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.it-ico{font-size:20px}
+.it-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.insight-title{font-size:14px;font-weight:700;margin-bottom:6px;line-height:1.4}
+.insight-body{font-size:12px;color:var(--m2);line-height:1.7}
+.insight-action{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;font-weight:700;color:var(--gold);cursor:pointer;border-bottom:1px solid rgba(212,175,55,.3)}
+.ic-opp{border-left:3px solid var(--gold)}
+.ic-warn{border-left:3px solid var(--amber)}
+.ic-growth{border-left:3px solid var(--green)}
+.ic-idea{border-left:3px solid var(--violet)}
+
+/* FEATURE REQUEST */
+.fr-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:680px}
+.fr-intro{font-size:13px;color:var(--m2);line-height:1.8;margin-bottom:20px}
+.fr-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--f);font-size:13px;outline:none;transition:.15s}
+.fi:focus{border-color:rgba(212,175,55,.4)}
+.fr-submit{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#C9A227,#E8C547);color:#0a0800;font-family:var(--d);font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.3px;box-shadow:0 4px 20px var(--gold-glow);margin-top:8px;transition:.2s}
+.fr-submit:hover{transform:translateY(-1px);box-shadow:0 6px 28px var(--gold-glow)}
+.notify-channels{display:flex;gap:8px;margin-top:8px}
+.nc-btn{flex:1;padding:10px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--m2);font-family:var(--f);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.nc-btn.on{background:var(--gold-dim);border-color:rgba(212,175,55,.3);color:var(--gold)}
+.nc-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+
+/* OVERHEAD */
+.overhead-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.oh-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px}
+.oh-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+.oh-gauge{position:relative;height:8px;background:rgba(255,255,255,.06);border-radius:4px;margin-bottom:6px}
+.oh-fill{height:100%;border-radius:4px;transition:width .8s}
+.oh-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+.oh-value{font-family:var(--mono);font-size:24px;font-weight:600;margin-bottom:3px}
+.oh-sub{font-size:11px;color:var(--muted)}
+.oh-badge{display:inline-block;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;margin-top:6px}
+.ohb-ok{background:rgba(34,197,94,.1);color:#4ADE80}
+.ohb-warn{background:rgba(245,158,11,.1);color:#FCD34D}
+.ohb-crit{background:rgba(239,68,68,.1);color:#FCA5A5}
+
+/* PERIOD TABS */
+.period-tabs{display:flex;gap:4px;background:rgba(255,255,255,.04);border-radius:9px;padding:3px;width:fit-content}
+.pt{padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);transition:.15s;border:none;background:transparent;font-family:var(--f)}
+.pt:hover{color:var(--text)}
+.pt.on{background:var(--s3);color:var(--gold);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:999;background:var(--s3);border:1px solid rgba(212,175,55,.2);border-radius:11px;padding:12px 18px;font-size:13px;opacity:0;transform:translateY(6px);transition:.25s;pointer-events:none;max-width:300px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* P&L TABLE */
+.pl-table{width:100%;border-collapse:collapse}
+.pl-table td,.pl-table th{padding:11px 16px;text-align:left;border-bottom:1px solid var(--border);font-size:13px}
+.pl-table th{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--s2)}
+.pl-table tr:last-child td{border:none}
+.pl-row-total td{border-top:1px solid rgba(212,175,55,.2)!important;font-weight:700}
+.pl-pos{color:var(--green);font-family:var(--mono)}.pl-neg{color:var(--red);font-family:var(--mono)}.pl-neutral{font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-h">
+    <div class="sb-brand">
+      <div class="sb-logo">A</div>
+      <div>
+        <div class="sb-nm">ATOM OPS</div>
+        <div class="sb-sub">Patron Modülü</div>
+      </div>
+    </div>
+    <div class="sb-rl">👑 PATRON</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Genel Bakış</div>
+    <div class="si on" onclick="sw('overview',this)"><span class="ic">⬡</span>Özet Dashboard</div>
+    <div class="sb-sec">Finansal</div>
+    <div class="si" onclick="sw('pl',this)"><span class="ic">📊</span>Kar / Zarar</div>
+    <div class="si" onclick="sw('ciro',this)"><span class="ic">💰</span>Ciro Analizi</div>
+    <div class="si" onclick="sw('overhead',this)"><span class="ic">🏗</span>Kapasite & Overhead</div>
+    <div class="sb-sec">Operasyonel</div>
+    <div class="si" onclick="sw('heatmap',this)"><span class="ic">🔥</span>Yoğunluk Haritası</div>
+    <div class="si" onclick="sw('insights',this)"><span class="ic">🤖</span>Öneriler & Fikirler</div>
+    <div class="sb-sec">Geliştirme</div>
+    <div class="si" onclick="sw('features',this)"><span class="ic">💡</span>Özellik Talebi</div>
+    <div class="sb-sec">Sayfalar</div>
+    <div class="si" onclick="window.open('ops-admin.html','_blank')"><span class="ic">🛡️</span>Admin Panel</div>
+    <div class="si" onclick="window.open('ops-super.html','_blank')"><span class="ic">📊</span>İşletme Panel</div>
+  </nav>
+  <div class="sb-f">
+    <div class="sb-u">
+      <div class="sb-av">👑</div>
+      <div>
+        <div class="sb-un">Patron</div>
+        <div class="sb-us">ops.atomkumpir.com</div>
+      </div>
+      <button class="lo" onclick="location.href='ops-login.html'" title="Çıkış">⎋</button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+<div class="topbar">
+  <span class="tb-t">Patron Paneli</span>
+  <div class="tb-r">
+    <div class="period-tabs">
+      <button class="pt on" onclick="changePeriod('gunluk',this)">Günlük</button>
+      <button class="pt" onclick="changePeriod('haftalik',this)">Haftalık</button>
+      <button class="pt" onclick="changePeriod('aylik',this)">Aylık</button>
+      <button class="pt" onclick="changePeriod('yillik',this)">Yıllık</button>
+    </div>
+    <div class="live"><div class="ld"></div>CANLI</div>
+    <span class="tb-clk" id="clk">--:--</span>
+  </div>
+</div>
+
+<!-- ═════ OVERVIEW ═════ -->
+<div class="pnl on" id="pnl-overview">
+  <div class="ph"><div><h2>İşletme Özeti</h2><p>Anlık veriler · Tüm kanallar</p></div>
+    <button class="btn gold" onclick="toast('📥 Yönetici raporu indiriliyor...')">📥 Rapor İndir</button>
+  </div>
+  <div class="kpi-row" id="kpiRow"></div>
+  <div class="chart-row">
+    <div class="card">
+      <div class="ch"><h3>SAATLİK CİRO</h3><span class="sub" id="ciroToday">Bugün</span></div>
+      <div class="cb"><div class="bar-chart" id="hourlyChart"></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>KANAL DAĞILIMI</h3></div>
+      <div class="cb"><div class="donut-wrap" id="donutChart"></div></div>
+    </div>
+  </div>
+  <div class="chart-row-3">
+    <div class="card">
+      <div class="ch"><h3>MASA DOLULUK</h3></div>
+      <div class="cb" id="occupancyCard"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>TOP ÜRÜNLER</h3></div>
+      <div class="cb" id="topProducts"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>ANLIK DURUM</h3></div>
+      <div class="cb" id="liveStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ KAR / ZARAR ═════ -->
+<div class="pnl" id="pnl-pl">
+  <div class="ph"><div><h2>Kar / Zarar Analizi</h2><p>Gelir · Gider · Net kar · Kategori dağılımı</p></div>
+    <div style="display:flex;gap:7px">
+      <button class="btn gold" onclick="toast('📥 P&L Excel indiriliyor...')">📥 Excel</button>
+      <button class="btn" onclick="toast('📄 Muhasebeci raporu hazırlandı')">📄 Muhasebe</button>
+    </div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi kpi-gr"><div class="kpi-label">Aylık Ciro</div><div class="kpi-value" style="color:var(--green)">₺284K</div><div class="kpi-delta up">▲ %18 geçen ay</div></div>
+    <div class="kpi kpi-g"><div class="kpi-label">Net Kar</div><div class="kpi-value" style="color:var(--gold)">₺68.2K</div><div class="kpi-delta up">%24 marj</div></div>
+    <div class="kpi kpi-r"><div class="kpi-label">Toplam Gider</div><div class="kpi-value" style="color:var(--red)">₺215K</div><div class="kpi-delta dn">▼ %3 azaldı</div></div>
+    <div class="kpi kpi-b"><div class="kpi-label">KDV Yükümlülüğü</div><div class="kpi-value" style="color:var(--blue)">₺25.6K</div><div class="kpi-delta nt">Beyan: 25 Mart</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px">
+    <div class="card">
+      <div class="ch"><h3>AYLIK GELİR / GİDER TABLOSU</h3></div>
+      <div class="cb">
+        <table class="pl-table">
+          <thead><tr><th>Kalem</th><th>Bu Ay</th><th>Geçen Ay</th><th>Δ</th></tr></thead>
+          <tbody id="plTable"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>GİDER KATEGORİLERİ</h3></div>
+      <div class="cb" id="expenseDonut"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ CİRO ANALİZİ ═════ -->
+<div class="pnl" id="pnl-ciro">
+  <div class="ph"><div><h2>Ciro Analizi</h2><p>Tüm kanallar · Saatlik · Trend</p></div></div>
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)" id="ciroKpiRow"></div>
+  <div class="card">
+    <div class="ch"><h3>HAFTALIK CİRO TRENDİ</h3></div>
+    <div class="cb"><div class="bar-chart" id="weeklyChart" style="height:180px"></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="card">
+      <div class="ch"><h3>KANAL KARŞILAŞTIRMA</h3></div>
+      <div class="cb" id="channelCompare"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>BÖLGESEL DAĞILIM</h3></div>
+      <div class="cb" id="regionMap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ KAPASİTE & OVERHEAD ═════ -->
+<div class="pnl" id="pnl-overhead">
+  <div class="ph"><div><h2>Kapasite & Overhead Analizi</h2><p>İşletme verimliliği · Sabit gider · Break-even</p></div></div>
+  <div class="overhead-grid" id="overheadCards"></div>
+  <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px">
+    <div class="card">
+      <div class="ch"><h3>BREAK-EVEN ANALİZİ</h3></div>
+      <div class="cb" id="breakEvenChart"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>PERSONEL VERİMLİLİĞİ</h3></div>
+      <div class="cb" id="staffEff"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ YOĞUNLUK HARİTASI ═════ -->
+<div class="pnl" id="pnl-heatmap">
+  <div class="ph"><div><h2>Yoğunluk Haritası</h2><p>Saat × Gün · Sipariş & doluluk analizi</p></div></div>
+  <div class="card">
+    <div class="ch"><h3>SAAT × GÜN YOĞUNLUĞU</h3><span class="sub">Son 4 hafta ortalaması</span></div>
+    <div class="cb">
+      <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:4px;align-items:center">
+          <div style="width:40px;height:10px;background:rgba(212,175,55,.08);border-radius:2px"></div>
+          <div style="width:40px;height:10px;background:rgba(212,175,55,.3);border-radius:2px"></div>
+          <div style="width:40px;height:10px;background:rgba(212,175,55,.6);border-radius:2px"></div>
+          <div style="width:40px;height:10px;background:rgba(212,175,55,.9);border-radius:2px"></div>
+        </div>
+        <span style="font-size:10px;color:var(--muted)">Düşük → Çok Yoğun</span>
+      </div>
+      <div class="heat-grid" id="heatGrid"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><h3>BÖLGESEL SICAKLIK ANALİZİ</h3><span class="sub">Teslimat siparişleri</span></div>
+    <div class="cb" id="regionHeat"></div>
+  </div>
+</div>
+
+<!-- ═════ ÖNERİLER ═════ -->
+<div class="pnl" id="pnl-insights">
+  <div class="ph"><div><h2>AI Önerileri & Kampanya Fikirleri</h2><p>Veriye dayalı aksiyon önerileri</p></div>
+    <button class="btn gold" onclick="refreshInsights()">🔄 Yenile</button>
+  </div>
+  <div class="insights-grid" id="insightsGrid"></div>
+</div>
+
+<!-- ═════ ÖZELLİK TALEBİ ═════ -->
+<div class="pnl" id="pnl-features">
+  <div class="ph"><div><h2>Özellik Talebi & Geliştirme</h2><p>Yeni özellik iste · Teklif al · Bilgi al</p></div></div>
+  <div class="fr-card">
+    <div class="fr-intro">
+      ATOM OPS sürekli gelişiyor. Yeni bir özellik veya iyileştirme fikriniz varsa, aşağıdaki formu doldurun. <strong style="color:var(--gold)">WhatsApp ve e-posta</strong> üzerinden bilgi ve fiyat teklifi alın.
+    </div>
+    <div class="fr-row">
+      <div><div class="fl">Ad Soyad</div><input class="fi" id="frName" placeholder="Ahmet Yılmaz"></div>
+      <div><div class="fl">İşletme Adı</div><input class="fi" id="frBiz" placeholder="ATOM Kumpir Gebze"></div>
+    </div>
+    <div class="fr-row">
+      <div><div class="fl">WhatsApp</div><input class="fi" id="frWA" placeholder="0532 000 00 00"></div>
+      <div><div class="fl">E-posta</div><input class="fi" id="frEmail" type="email" placeholder="patron@atomkumpir.com"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div class="fl">Öncelik</div>
+      <div style="display:flex;gap:7px;margin-top:5px" id="frPrioGroup">
+        <button class="nc-btn on" onclick="selectPrio(this)" data-val="Acil">🔴 Acil</button>
+        <button class="nc-btn" onclick="selectPrio(this)" data-val="Normal">🟡 Normal</button>
+        <button class="nc-btn" onclick="selectPrio(this)" data-val="Fikir">💡 Fikir</button>
+      </div>
+    </div>
+    <div style="margin-bottom:12px"><div class="fl">Konu / Modül</div>
+      <select class="fi" id="frModule">
+        <option>Garson Paneli</option><option>Mutfak Ekranı</option><option>Vale Servisi</option>
+        <option>Süpervizör</option><option>Admin</option><option>Patron Modülü</option>
+        <option>Entegrasyon</option><option>Menü Yönetimi</option><option>Ödeme Sistemi</option><option>Diğer</option>
+      </select>
+    </div>
+    <div style="margin-bottom:4px"><div class="fl">İstek / Fikir Detayı</div>
+      <textarea class="fi" id="frDesc" rows="4" placeholder="Örnek: Garson panelinde sipariş değişikliği yapabilmek istiyorum. Mutfağa gönderilmeden önce ürün ekleyip çıkarmak..."></textarea>
+    </div>
+    <div style="margin-bottom:12px"><div class="fl" style="margin-bottom:8px">Bildirim Kanalı</div>
+      <div class="notify-channels" id="notifyChannels">
+        <button class="nc-btn on" onclick="toggleChannel(this)" data-ch="wa">📱 WhatsApp</button>
+        <button class="nc-btn on" onclick="toggleChannel(this)" data-ch="email">✉️ E-posta</button>
+        <button class="nc-btn" onclick="toggleChannel(this)" data-ch="sms">📤 SMS</button>
+      </div>
+    </div>
+    <button class="fr-submit" onclick="submitFeature()">📤 Talebi Gönder · WhatsApp & E-posta Bilgilendirme Al</button>
+    <div style="margin-top:12px;padding:10px 14px;background:var(--gold-dim);border:1px solid rgba(212,175,55,.15);border-radius:9px;font-size:11px;color:var(--m2)">
+      ✉️ <strong style="color:var(--gold)">info@atomops.com</strong> · 📱 <strong style="color:var(--gold)">+90 (535) 977 72 75</strong>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:680px">
+    <div class="ch"><h3>GÖNDERİLEN TALEPLERİM</h3></div>
+    <div class="cb">
+      <div id="frHistory"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ── DATA ──
+const PERIODS = {
+  gunluk:  {ciro:'₺18.4K',kar:'₺4.4K',siparis:247,doluluk:'68%',marj:'%24'},
+  haftalik:{ciro:'₺124K', kar:'₺29.8K',siparis:1640,doluluk:'71%',marj:'%24'},
+  aylik:   {ciro:'₺284K', kar:'₺68.2K',siparis:3820,doluluk:'69%',marj:'%24'},
+  yillik:  {ciro:'₺3.2M', kar:'₺768K',siparis:44200,doluluk:'67%',marj:'%24'},
+};
+
+let currentPeriod = 'gunluk';
+
+const CHANNELS = [
+  {n:'Masa & Direkt',v:35,c:'#D4AF37'},{n:'Trendyol',v:28,c:'#FDBA74'},
+  {n:'Getir',v:21,c:'#C4B5FD'},{n:'Yemeksepeti',v:10,c:'#F9A8D4'},{n:'WhatsApp',v:6,c:'#86EFAC'},
+];
+
+const INSIGHTS = [
+  {type:'opp',ico:'💡',label:'Fırsat',title:'Perşembe akşamları %40 altında doluluk',
+   body:'Son 4 haftada Perşembe 17:00–20:00 arası ortalamanın %40 altında sipariş geliyor. "Perşembe Özel" kampanyası bu saatlerde %60 ciro artışı sağlayabilir.',
+   action:'Kampanya Oluştur →'},
+  {type:'warn',ico:'⚠️',label:'Dikkat',title:'Crispy Chicken stok iptalleri artıyor',
+   body:'Bu ürün son 7 günde 14 kez "stok yok" nedeniyle kapandı. Her kapatma ortalama ₺1.200 kayıp. Tedarik sürecini gözden geçirin.',
+   action:'Stok Raporuna Git →'},
+  {type:'growth',ico:'📈',label:'Büyüme',title:'Getir kanalı %34 büyüdü',
+   body:'Getir kanalından gelen siparişler son 30 günde %34 artış gösterdi. Getir\'deki menü vitrinini güçlendirerek bu ivmeyi koruyabilirsiniz.',
+   action:'Getir Entegrasyonuna Git →'},
+  {type:'idea',ico:'🎯',label:'Kampanya Fikri',title:'Rezervasyon teşvik kampanyası',
+   body:'Haftaiçi öğle rezervasyonları çok düşük. "2 kişi gel 1 tatlı bedava" kampanyası ile %25 ek doluluk sağlanabilir. WhatsApp üzerinden 450 müşteriye otomatik mesaj.',
+   action:'WhatsApp Kampanyası Oluştur →'},
+  {type:'opp',ico:'💰',label:'Fırsat',title:'Ortalama sepet tutarı ₺6 artırılabilir',
+   body:'"Sipariş tamamlandı" ekranına ürün önerisi eklemek sepet tutarını ortalama ₺6 artırır. Milkshake ve tatlı önerisi en yüksek dönüşüm oranına sahip.',
+   action:'Menü Yönetimine Git →'},
+  {type:'growth',ico:'⭐',label:'VIP Büyümesi',title:'VIP müşteri segmenti ihmal ediliyor',
+   body:'Ayda 3+ sipariş veren 67 müşteri var ancak hiçbirine özel teklif yapılmamış. VIP kart programı ile bu müşterileri bağımlı hale getirebilirsiniz.',
+   action:'Müşteri CRM\'e Git →'},
+];
+
+const PL_DATA = [
+  {kalem:'🍔 Yemek Satışı',bu:'₺248.000',gen:'₺210.000',delta:'up',d:'+18%'},
+  {kalem:'🛵 Teslimat Gelirleri',bu:'₺36.000',gen:'₺28.000',delta:'up',d:'+28%'},
+  {kalem:'TOPLAM GELİR',bu:'₺284.000',gen:'₺238.000',delta:'up',d:'+19%',bold:true},
+  {kalem:'🛒 Hammadde',bu:'-₺89.000',gen:'-₺78.000',delta:'dn',d:'-14%'},
+  {kalem:'👨‍💼 Personel',bu:'-₺58.000',gen:'-₺55.000',delta:'dn',d:'-5%'},
+  {kalem:'🏠 Kira',bu:'-₺28.000',gen:'-₺28.000',delta:'nt',d:'0%'},
+  {kalem:'📦 Paket / Malzeme',bu:'-₺18.000',gen:'-₺16.000',delta:'dn',d:'-11%'},
+  {kalem:'🔌 Enerji / Su',bu:'-₺12.000',gen:'₺11.500',delta:'dn',d:'-4%'},
+  {kalem:'📱 Pazaryeri Komisyon',bu:'-₺10.000',gen:'-₺8.400',delta:'dn',d:'-19%'},
+  {kalem:'TOPLAM GİDER',bu:'-₺215.000',gen:'-₺197.000',delta:'dn',d:'-9%',bold:true},
+  {kalem:'💰 NET KAR',bu:'₺68.200',gen:'₺41.000',delta:'up',d:'+66%',bold:true,highlight:true},
+];
+
+const FR_HISTORY = [
+  {title:'Garson panelinde çoklu sipariş düzenleme',modul:'Garson',status:'Geliştiriliyor',date:'02 Mar'},
+  {title:'Trendyol stok otomatik sync saati',modul:'Entegrasyon',status:'Tamamlandı',date:'28 Şub'},
+];
+
+let frPrio = 'Acil';
+const frChannels = new Set(['wa','email']);
+
+// ── RENDERS ──
+function renderKPI(){
+  const p=PERIODS[currentPeriod];
+  const sparks=[4,7,5,9,8,12,11,15,14,18];
+  document.getElementById('kpiRow').innerHTML=`
+    <div class="kpi kpi-gr"><div class="kpi-label">Toplam Ciro</div><div class="kpi-value" style="color:var(--green)">${p.ciro}</div><div class="kpi-delta up">▲ %18</div>
+      <div class="kpi-sparkline">${sparks.map(v=>`<div class="spark-bar" style="height:${(v/18)*100}%;background:var(--green)"></div>`).join('')}</div></div>
+    <div class="kpi kpi-g"><div class="kpi-label">Net Kar</div><div class="kpi-value" style="color:var(--gold)">${p.kar}</div><div class="kpi-delta up">${p.marj} marj</div></div>
+    <div class="kpi kpi-r"><div class="kpi-label">Sipariş Adedi</div><div class="kpi-value" style="color:#FF6B3D">${p.siparis.toLocaleString()}</div><div class="kpi-delta up">▲ %12</div></div>
+    <div class="kpi kpi-b"><div class="kpi-label">Masa Doluluk</div><div class="kpi-value" style="color:var(--blue)">${p.doluluk}</div><div class="kpi-delta nt">12/12 masa</div></div>
+    <div class="kpi kpi-v"><div class="kpi-label">Ort. Sepet</div><div class="kpi-value" style="color:#C4B5FD">₺74.5</div><div class="kpi-delta up">▲ %6</div></div>`;
+}
+
+function renderHourly(){
+  const vals=[0,0,8,14,22,42,58,76,64,48,71,85,92,78,55,62,88,96,84,72,54,38,22,8];
+  const hours=['00','01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23'];
+  const mx=Math.max(...vals);
+  const now=new Date().getHours();
+  document.getElementById('hourlyChart').innerHTML=`
+    ${vals.map((v,i)=>`<div class="bc-col">
+      <div class="bc-bar-wrap"><div class="bc-bar" data-val="₺${v*190}@${hours[i]}:00"
+        style="height:${v?Math.max((v/mx)*140,4):2}px;background:${i===now?'var(--gold)':i<now?'rgba(212,175,55,.4)':'rgba(255,255,255,.06)'}"></div></div>
+      <div class="bc-lbl">${hours[i]}</div>
+    </div>`).join('')}`;
+  document.getElementById('ciroToday').textContent = `Anlık: ₺${(Math.random()*3200+800).toFixed(0)}/saat`;
+}
+
+function renderDonut(){
+  const total=CHANNELS.reduce((a,b)=>a+b.v,0);
+  let offset=0;
+  const r=50,cx=60,cy=60,circum=2*Math.PI*r;
+  const slices=CHANNELS.map(c=>{
+    const len=(c.v/total)*circum;
+    const s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.c}" stroke-width="16"
+      stroke-dasharray="${len-1} ${circum-len+1}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" style="transition:.6s"/>`;
+    offset+=len;
+    return s;
+  }).join('');
+
+  document.getElementById('donutChart').innerHTML=`
+    <svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="16"/>
+      ${slices}
+      <text x="60" y="56" text-anchor="middle" font-family="JetBrains Mono" font-size="12" font-weight="600" fill="white">₺18.4K</text>
+      <text x="60" y="70" text-anchor="middle" font-family="Figtree" font-size="8" fill="#4E5670">Bugün</text>
+    </svg>
+    <div class="donut-legend">
+      ${CHANNELS.map(c=>`<div class="dl-item"><div class="dl-dot" style="background:${c.c}"></div><span class="dl-name">${c.n}</span><span class="dl-pct" style="color:${c.c}">%${c.v}</span></div>`).join('')}
+    </div>`;
+}
+
+function renderOccupancy(){
+  const pct=68;
+  document.getElementById('occupancyCard').innerHTML=`
+    <div style="text-align:center;margin-bottom:14px">
+      <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:var(--gold)">${pct}%</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">8/12 masa dolu</div>
+    </div>
+    <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:var(--gold);border-radius:4px;transition:width .8s"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+      <div style="text-align:center;padding:10px;background:rgba(232,57,14,.06);border-radius:8px">
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--red)">8</div>
+        <div style="font-size:10px;color:var(--muted)">Dolu</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:rgba(34,197,94,.04);border-radius:8px">
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)">4</div>
+        <div style="font-size:10px;color:var(--muted)">Boş</div>
+      </div>
+    </div>`;
+}
+
+function renderTopProducts(){
+  const prods=[{n:'Kumpir Klasik',cnt:48,col:'#D4AF37'},{n:'Smash Burger',cnt:36,col:'#FDBA74'},{n:'Kumpir Spesyal',cnt:29,col:'#FCD34D'},{n:'Double Smash',cnt:24,col:'#F9A8D4'},{n:'Waffle',cnt:18,col:'#C4B5FD'}];
+  const mx=Math.max(...prods.map(p=>p.cnt));
+  document.getElementById('topProducts').innerHTML=prods.map(p=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px">
+        <span style="font-weight:600">${p.n}</span>
+        <span style="font-family:var(--mono);color:${p.col}">${p.cnt} adet</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px">
+        <div style="height:100%;width:${(p.cnt/mx)*100}%;background:${p.col};border-radius:3px"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderLiveStatus(){
+  document.getElementById('liveStatus').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600">🍳 Mutfak Kuyruk</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--amber)">7 sipariş</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600">🛵 Teslimat</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--blue)">3 kurye yolda</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600">🚗 Vale Kuyruk</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--violet)">4 araç</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600">⭐ VIP Masa</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--gold)">1 aktif</span>
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600">💰 Anlık Ciro</span>
+        <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold)" id="liveCiro">₺—</span>
+      </div>
+    </div>`;
+  setInterval(()=>{
+    const el=document.getElementById('liveCiro');
+    if(el) el.textContent='₺'+(Math.floor(Math.random()*8000+12000)).toLocaleString();
+  },3000);
+}
+
+function renderPL(){
+  document.getElementById('plTable').innerHTML=PL_DATA.map(r=>`
+    <tr class="${r.bold?'pl-row-total':''}" style="${r.highlight?'background:rgba(212,175,55,.05)':''}">
+      <td style="${r.bold?'font-weight:800':''}font-size:${r.bold?'13':'12'}px">${r.kalem}</td>
+      <td class="${r.delta==='up'?'pl-pos':r.delta==='dn'?'pl-neg':'pl-neutral'}">${r.bu}</td>
+      <td class="pl-neutral" style="opacity:.6">${r.gen}</td>
+      <td class="${r.delta==='up'?'pl-pos':r.delta==='dn'?'pl-neg':'pl-neutral'}">${r.d}</td>
+    </tr>`).join('');
+
+  const exp=[{n:'Hammadde',v:41,c:'#EF4444'},{n:'Personel',v:27,c:'#F59E0B'},{n:'Kira',v:13,c:'#3B82F6'},{n:'Paket',v:8,c:'#8B5CF6'},{n:'Enerji',v:6,c:'#22C55E'},{n:'Komisyon',v:5,c:'#EC4899'}];
+  document.getElementById('expenseDonut').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
+    ${exp.map(e=>`<div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;font-weight:600">${e.n}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:${e.c}">%${e.v}</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px">
+        <div style="height:100%;width:${e.v}%;background:${e.c};border-radius:3px"></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function renderCiro(){
+  document.getElementById('ciroKpiRow').innerHTML=`
+    <div class="kpi kpi-g"><div class="kpi-label">Masa Direkt</div><div class="kpi-value" style="color:var(--gold)">₺99K</div><div class="kpi-delta up">%35</div></div>
+    <div class="kpi kpi-r"><div class="kpi-label">Trendyol</div><div class="kpi-value" style="color:#FDBA74">₺80K</div><div class="kpi-delta up">%28</div></div>
+    <div class="kpi kpi-v"><div class="kpi-label">Getir</div><div class="kpi-value" style="color:#C4B5FD">₺60K</div><div class="kpi-delta up">%21</div></div>
+    <div class="kpi kpi-b"><div class="kpi-label">Yemeksepeti</div><div class="kpi-value" style="color:#F9A8D4">₺28K</div><div class="kpi-delta nt">%10</div></div>
+    <div class="kpi kpi-gr"><div class="kpi-label">WhatsApp/Diğer</div><div class="kpi-value" style="color:#86EFAC">₺17K</div><div class="kpi-delta up">%6</div></div>`;
+
+  const weeks=[{l:'H1',v:84},{l:'H2',v:92},{l:'H3',v:78},{l:'H4',v:104},{l:'H5',v:118},{l:'H6',v:98},{l:'H7',v:124}];
+  const mx=Math.max(...weeks.map(w=>w.v));
+  document.getElementById('weeklyChart').innerHTML=weeks.map(w=>`
+    <div class="bc-col">
+      <div class="bc-bar-wrap"><div class="bc-bar" data-val="₺${w.v}K" style="height:${(w.v/mx)*160}px;background:linear-gradient(to top,#C9A227,#E8C547)"></div></div>
+      <div class="bc-lbl">${w.l}</div>
+    </div>`).join('');
+
+  document.getElementById('channelCompare').innerHTML=CHANNELS.map(c=>`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:600">${c.n}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:${c.c}">%${c.v}</span>
+      </div>
+      <div style="height:7px;background:rgba(255,255,255,.06);border-radius:4px">
+        <div style="height:100%;width:${c.v}%;background:${c.c};border-radius:4px"></div>
+      </div>
+    </div>`).join('');
+
+  const regions=[{n:'Gebze Merkez',v:42,c:'#D4AF37'},{n:'Darıca',v:18,c:'#FDBA74'},{n:'Çayırova',v:14,c:'#FCD34D'},{n:'Dilovası',v:8,c:'#C4B5FD'},{n:'Diğer',v:18,c:'#6B7280'}];
+  document.getElementById('regionMap').innerHTML=`<div style="display:flex;flex-direction:column;gap:9px">
+    ${regions.map(r=>`<div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;font-weight:600">📍 ${r.n}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:${r.c}">%${r.v}</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px">
+        <div style="height:100%;width:${r.v}%;background:${r.c};border-radius:3px"></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function renderOverhead(){
+  const items=[
+    {title:'Masa Doluluk Oranı',val:'68%',fill:68,sub:'8/12 masa aktif',badge:'ohb-ok',blbl:'İyi',color:'var(--green)'},
+    {title:'Sabit Gider Karşılama',val:'₺98K',fill:74,sub:'Break-even: ₺132K/ay',badge:'ohb-warn',blbl:'Dikkat',color:'var(--amber)'},
+    {title:'Kapasiteye Kullanım',val:'%71',fill:71,sub:'Optimum: %80+',badge:'ohb-warn',blbl:'İyileştirilebilir',color:'var(--amber)'},
+    {title:'Teslimat Verimliliği',val:'91%',fill:91,sub:'Ortalama 28 dk',badge:'ohb-ok',blbl:'Çok İyi',color:'var(--green)'},
+    {title:'Personel / Ciro Oranı',val:'%20.4',fill:20,sub:'Sektör ortalaması %22',badge:'ohb-ok',blbl:'İyi',color:'var(--green)'},
+    {title:'Stok Devir Hızı',val:'4.2x',fill:84,sub:'Aylık devir hızı',badge:'ohb-ok',blbl:'İyi',color:'var(--green)'},
+  ];
+  document.getElementById('overheadCards').innerHTML=items.map(item=>`
+    <div class="oh-card">
+      <div class="oh-title">${item.title}</div>
+      <div class="oh-value" style="color:${item.color}">${item.val}</div>
+      <div class="oh-gauge"><div class="oh-fill" style="width:${item.fill}%;background:${item.color}"></div></div>
+      <div class="oh-labels"><span>0</span><span>100</span></div>
+      <div class="oh-sub">${item.sub}</div>
+      <span class="oh-badge ${item.badge}">${item.blbl}</span>
+    </div>`).join('');
+
+  const beData=[0,48,96,132,168,204,240,284];
+  const fixedCost=132;
+  document.getElementById('breakEvenChart').innerHTML=`
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Aylık break-even noktası: <strong style="color:var(--gold)">₺132K</strong> · Mevcut: <strong style="color:var(--green)">₺284K</strong></div>
+    <div style="height:80px;display:flex;align-items:flex-end;gap:8px">
+      ${beData.map((v,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+        <div style="width:100%;border-radius:4px 4px 0 0;height:${(v/284)*70}px;
+          background:${v<fixedCost?'rgba(239,68,68,.4)':v===beData[beData.length-1]?'var(--gold)':'rgba(34,197,94,.4)'};transition:.6s"></div>
+        <span style="font-size:9px;color:var(--muted)">₺${v>0?v+'K':0}</span>
+      </div>`).join('')}
+    </div>`;
+
+  document.getElementById('staffEff').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
+    ${[{r:'Garson',cnt:3,ciro:'₺94K',eff:'İyi'},{r:'Mutfak',cnt:2,ciro:'₺142K',eff:'Çok İyi'},{r:'Vale',cnt:1,ciro:'₺48K',eff:'Normal'}].map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px">
+      <div><div style="font-size:12px;font-weight:700">${s.r}</div><div style="font-size:10px;color:var(--muted)">${s.cnt} personel</div></div>
+      <div style="text-align:right"><div style="font-family:var(--mono);font-size:12px;color:var(--gold)">${s.ciro}</div><div style="font-size:10px;color:var(--green)">${s.eff}</div></div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderHeatmap(){
+  const days=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  const hours12=['10','11','12','13','14','15','16','17','18','19','20','21'];
+  const data={
+    'Pzt':[2,3,4,5,4,3,4,5,6,7,8,5],
+    'Sal':[2,3,5,6,5,4,5,6,7,8,9,6],
+    'Çar':[3,4,5,6,5,4,5,6,8,7,9,5],
+    'Per':[2,2,3,4,3,2,3,4,4,5,6,4],
+    'Cum':[4,5,7,8,7,6,7,8,9,10,10,7],
+    'Cmt':[5,6,8,9,8,7,8,9,10,10,10,8],
+    'Paz':[4,5,7,8,7,6,7,8,9,10,9,7],
+  };
+  const mx=10;
+  let html=`<div class="hg-label"></div>${hours12.map(h=>`<div class="hg-head">${h}</div>`).join('')}`;
+  days.forEach(d=>{
+    html+=`<div class="hg-label">${d}</div>`;
+    data[d].forEach(v=>{
+      const opacity=Math.max(v/mx,.08);
+      html+=`<div class="heat-cell" style="background:rgba(212,175,55,${opacity})" title="${d} ${hours12[data[d].indexOf(v)]}:00 · Yoğunluk: ${v}/10"></div>`;
+    });
+  });
+  document.getElementById('heatGrid').innerHTML=html;
+
+  document.getElementById('regionHeat').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      ${[{n:'Gebze Merkez',h:'🔥🔥🔥',c:'#D4AF37',sub:'42% teslimat'},{n:'Darıca',h:'🔥🔥',c:'#FDBA74',sub:'18% teslimat'},{n:'Çayırova',h:'🔥🔥',c:'#FCD34D',sub:'14% teslimat'},{n:'Dilovası',h:'🔥',c:'#6B7280',sub:'8% teslimat'},{n:'Tavşancıl',h:'🔥',c:'#6B7280',sub:'5% teslimat'},{n:'Diğer',h:'💧',c:'#374151',sub:'13%'}].map(r=>`
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;margin-bottom:4px">${r.h}</div>
+        <div style="font-size:11px;font-weight:700;color:${r.c}">${r.n}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${r.sub}</div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function renderInsights(){
+  const typeStyles={opp:'ic-opp',warn:'ic-warn',growth:'ic-growth',idea:'ic-idea'};
+  document.getElementById('insightsGrid').innerHTML=INSIGHTS.map(ins=>`
+    <div class="insight-card ${typeStyles[ins.type]}">
+      <div class="insight-type"><span class="it-ico">${ins.ico}</span><span class="it-label">${ins.label}</span></div>
+      <div class="insight-title">${ins.title}</div>
+      <div class="insight-body">${ins.body}</div>
+      <span class="insight-action">${ins.action}</span>
+    </div>`).join('');
+}
+
+function refreshInsights(){
+  document.getElementById('insightsGrid').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)">⏳ AI önerileri yenileniyor...</div>`;
+  setTimeout(()=>renderInsights(),1500);
+  toast('🤖 AI öneriler güncelleniyor...');
+}
+
+function renderFRHistory(){
+  document.getElementById('frHistory').innerHTML=FR_HISTORY.map(f=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:13px;font-weight:600">${f.title}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${f.modul} · ${f.date}</div>
+      </div>
+      <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px;
+        background:${f.status==='Tamamlandı'?'rgba(34,197,94,.1)':'rgba(59,130,246,.1)'};
+        color:${f.status==='Tamamlandı'?'#4ADE80':'#93C5FD'}">${f.status}</span>
+    </div>`).join('');
+}
+
+// ── FEATURE FORM ──
+function selectPrio(btn){
+  document.querySelectorAll('#frPrioGroup .nc-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); frPrio=btn.dataset.val;
+}
+
+function toggleChannel(btn){ btn.classList.toggle('on'); }
+
+function submitFeature(){
+  const name=document.getElementById('frName').value.trim();
+  const desc=document.getElementById('frDesc').value.trim();
+  const wa=document.getElementById('frWA').value.trim();
+  if(!name||!desc){ toast('⚠️ Ad ve açıklama zorunlu'); return; }
+  const msg=encodeURIComponent(`*Özellik Talebi* 💡\nİsim: ${name}\nMódül: ${document.getElementById('frModule').value}\nÖncelik: ${frPrio}\nAçıklama: ${desc}`);
+  window.open(`https://api.whatsapp.com/send?phone=905359777275&text=${msg}`,'_blank');
+  toast('✅ Talebiniz iletildi · WhatsApp & e-posta bilgilendirme alacaksınız');
+  FR_HISTORY.unshift({title:desc.slice(0,50)+'...',modul:document.getElementById('frModule').value,status:'İnceleniyor',date:new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'short'})});
+  renderFRHistory();
+  document.getElementById('frDesc').value='';
+}
+
+// ── PERIOD ──
+function changePeriod(p, el){
+  currentPeriod=p;
+  document.querySelectorAll('.pt').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  renderKPI(); renderHourly();
+  toast('📊 Dönem: '+el.textContent);
+}
+
+// ── PANEL SWITCH ──
+const TITLES={overview:'İşletme Özeti',pl:'Kar / Zarar',ciro:'Ciro Analizi',
+  overhead:'Kapasite & Overhead',heatmap:'Yoğunluk Haritası',insights:'AI Önerileri',features:'Özellik Talebi'};
+function sw(id,el){
+  document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.si').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pnl-'+id).classList.add('on');
+  el.classList.add('on');
+  document.getElementById('topT').textContent=TITLES[id]||id;
+}
+
+// ── TOAST ──
+function toast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3200);}
+
+// ── CLOCK ──
+setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});},1000);
+
+// ── INIT ──
+renderKPI(); renderHourly(); renderDonut(); renderOccupancy(); renderTopProducts(); renderLiveStatus();
+renderPL(); renderCiro(); renderOverhead(); renderHeatmap(); renderInsights(); renderFRHistory();
+</script>
+</body>
+</html>

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ATOM OPS · İşletme</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E8390E;--rd:rgba(232,57,14,.12);--rg:rgba(232,57,14,.25);
+  --bg:#060709;--s1:#0D0F13;--s2:#131720;--s3:#1A1F2E;
+  --border:rgba(255,255,255,.07);--b2:rgba(255,255,255,.12);
+  --text:#ECF0F8;--muted:#4E5670;--m2:#7B849A;
+  --green:#22C55E;--amber:#F59E0B;--blue:#3B82F6;
+  --f:'Figtree',sans-serif;--mono:'JetBrains Mono',monospace;--d:'Syne',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f);overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* SHELL */
+.shell{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sb{width:210px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none}
+.sb-h{padding:16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:10px}
+.sb-logo{width:36px;height:36px;border-radius:10px;background:var(--red);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--d);font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-nm{font-family:var(--d);font-size:13px;font-weight:700;line-height:1.2}
+.sb-rl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--blue);background:rgba(59,130,246,.1);border-radius:4px;padding:2px 7px;display:inline-block;margin-top:5px}
+.sb-nav{flex:1;padding:8px}
+.sb-sec{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);padding:10px 8px 4px}
+.si{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:1px;
+  cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:all .15s;position:relative}
+.si:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.si.on{background:rgba(59,130,246,.1);color:#fff;font-weight:700}
+.si .ic{width:16px;text-align:center;font-size:12px;flex-shrink:0}
+.si .badge{margin-left:auto;min-width:18px;height:16px;border-radius:4px;
+  background:var(--red);color:#fff;font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;padding:0 4px}
+.sb-f{padding:12px;border-top:1px solid var(--border)}
+.sb-u{display:flex;align-items:center;gap:8px}
+.sb-av{width:30px;height:30px;border-radius:50%;background:rgba(59,130,246,.15);
+  border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0}
+.sb-un{font-size:11px;font-weight:600}
+.sb-us{font-size:10px;color:var(--muted)}
+.lo{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px}
+.lo:hover{color:var(--text)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(6,7,9,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);height:50px;padding:0 22px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-t{font-family:var(--d);font-size:14px;font-weight:700}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-clk{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tb-nb{position:relative;width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px}
+.tb-nd{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+.live{display:flex;align-items:center;gap:5px;background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.15);border-radius:20px;padding:4px 10px;
+  font-size:10px;font-weight:700;color:#4ADE80}
+.ld{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* PANELS */
+.pnl{display:none;padding:22px;flex-direction:column;gap:18px;animation:fi .2s ease}
+.pnl.on{display:flex}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEAD */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.ph h2{font-family:var(--d);font-size:17px;font-weight:800;letter-spacing:-.3px}
+.ph p{font-size:11px;color:var(--muted);margin-top:2px}
+.br{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+
+/* BUTTONS */
+.btn{padding:8px 15px;border-radius:8px;border:1px solid var(--border);background:transparent;
+  color:var(--m2);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;
+  font-family:var(--f);display:inline-flex;align-items:center;gap:5px;letter-spacing:.3px}
+.btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.btn.pr{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 4px 14px var(--rg)}
+.btn.pr:hover{background:#ff4918}
+.btn.gr{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.2);color:#4ADE80}
+.btn.am{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);color:#FCD34D}
+.btn.dn{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.15);color:#FCA5A5}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.ch{padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ch h3{font-family:var(--d);font-size:12px;font-weight:700}
+.cb{padding:18px}
+
+/* STAT CARDS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sc{background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:16px;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sr::after{background:var(--red)}.sg2::after{background:var(--green)}
+.sb2::after{background:var(--blue)}.sa::after{background:var(--amber)}
+.sl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.sv{font-family:var(--mono);font-size:22px;font-weight:600;margin-bottom:3px}
+.sd{font-size:10px;color:var(--muted)}
+.sv-r{color:#FF6B3D}.sv-g{color:#4ADE80}.sv-b{color:#93C5FD}.sv-a{color:#FCD34D}
+
+/* ORDERS TABLE */
+.ot{width:100%;border-collapse:collapse}
+.ot th{padding:8px 14px;font-size:9px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);text-align:left;
+  background:var(--s2);border-bottom:1px solid var(--border)}
+.ot td{padding:11px 14px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.ot tr:last-child td{border:none}
+.ot tr:hover td{background:rgba(255,255,255,.018)}
+.ch-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700}
+.ctr{background:rgba(232,57,14,.12);color:var(--red)}
+.ctg{background:rgba(139,92,246,.1);color:#C4B5FD}
+.ctt{background:rgba(249,115,22,.1);color:#FDBA74}
+.ctw{background:rgba(34,197,94,.1);color:#86EFAC}
+.cti{background:rgba(236,72,153,.1);color:#F9A8D4}
+.ctm{background:rgba(59,130,246,.1);color:#93C5FD}
+.st-tag{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700}
+.st-new{background:rgba(239,68,68,.12);color:#FCA5A5}
+.st-prep{background:rgba(245,158,11,.1);color:#FCD34D}
+.st-ready{background:rgba(34,197,94,.1);color:#86EFAC}
+.st-del{background:rgba(59,130,246,.1);color:#93C5FD}
+.st-done{background:rgba(100,116,139,.1);color:#94A3B8}
+
+/* MARKETPLACE TOGGLE */
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.mkt-card{background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;transition:.2s}
+.mkt-card:hover{border-color:var(--b2)}
+.mkt-info{display:flex;align-items:center;gap:10px}
+.mkt-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.mkt-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.mkt-orders{font-size:10px;color:var(--muted)}
+.tog{width:40px;height:22px;border-radius:11px;position:relative;
+  transition:.25s;flex-shrink:0;border:none;cursor:pointer;outline:none}
+.tog.on{background:var(--green)}.tog.off{background:#2D3748}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;
+  border-radius:50%;top:2px;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.tog.on::after{left:20px}.tog.off::after{left:2px}
+
+/* DELIVERY TRACKER */
+.del-list{display:flex;flex-direction:column;gap:10px}
+.del-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px}
+.del-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.del-steps{display:flex;gap:0;margin-top:8px}
+.ds{flex:1;text-align:center;position:relative}
+.ds::before{content:'';position:absolute;top:9px;left:0;right:0;height:2px;background:var(--border)}
+.ds:first-child::before{left:50%}
+.ds:last-child::before{right:50%}
+.ds.done::before{background:var(--green)}
+.dsc{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:9px;margin:0 auto 4px;position:relative;z-index:1}
+.ds.done .dsc{background:var(--green);border-color:var(--green);color:#fff}
+.ds.act .dsc{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--rg)}50%{box-shadow:0 0 0 6px transparent}}
+.ds-lbl{font-size:9px;color:var(--muted);font-weight:600}
+
+/* PAYMENT */
+.masa-pay-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.mp-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:.2s}
+.mp-card:hover{border-color:var(--b2)}
+.mp-card.open-bill{border-color:var(--rg)}
+.mp-card.paid{border-color:rgba(34,197,94,.3);opacity:.6}
+.mp-no{font-family:var(--d);font-size:24px;font-weight:800;margin-bottom:4px}
+.mp-amt{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--red)}
+.mp-pax{font-size:10px;color:var(--muted);margin-top:2px}
+.mp-status{font-size:10px;font-weight:700;margin-top:8px;padding:3px 8px;
+  border-radius:4px;display:inline-block}
+.mps-open{background:var(--rd);color:var(--red)}
+.mps-paid{background:rgba(34,197,94,.1);color:#4ADE80}
+.mps-empty{background:rgba(255,255,255,.05);color:var(--muted)}
+
+/* SHIFT */
+.shift-row{display:flex;align-items:center;gap:12px;padding:11px 14px;
+  border-bottom:1px solid var(--border)}
+.shift-row:last-child{border:none}
+.shift-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.shift-name{font-size:13px;font-weight:600;flex:1}
+.shift-role{font-size:10px;color:var(--muted)}
+.shift-time{font-family:var(--mono);font-size:11px;color:var(--m2)}
+.shift-status{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;white-space:nowrap}
+.ss-in{background:rgba(34,197,94,.1);color:#4ADE80}
+.ss-out{background:rgba(100,116,139,.1);color:#94A3B8}
+.ss-break{background:rgba(245,158,11,.1);color:#FCD34D}
+
+/* NOTIFICATIONS */
+.notif-list{display:flex;flex-direction:column;gap:8px}
+.notif-item{display:flex;gap:12px;padding:12px 14px;border-radius:11px;
+  background:var(--s1);border:1px solid var(--border);cursor:pointer;transition:.15s}
+.notif-item:hover{border-color:var(--b2)}
+.notif-item.unread{border-left:3px solid var(--red)}
+.ni-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.ni-body{flex:1}
+.ni-title{font-size:13px;font-weight:700;margin-bottom:2px}
+.ni-sub{font-size:11px;color:var(--muted);line-height:1.5}
+.ni-time{font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+.ni-actions{display:flex;gap:7px;margin-top:8px}
+.ni-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;
+  color:var(--m2);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f);transition:.15s}
+.ni-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.ni-btn.wa{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);color:#86EFAC}
+
+/* RESERVATIONS */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.res-card{background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:16px;transition:.2s}
+.res-card:hover{border-color:var(--b2)}
+.res-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.res-name{font-size:14px;font-weight:700}
+.res-date{font-family:var(--mono);font-size:11px;color:var(--m2)}
+.res-detail{font-size:12px;color:var(--muted);line-height:1.7}
+.res-actions{display:flex;gap:7px;margin-top:12px}
+
+/* CAMPAIGN */
+.camp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.camp-card{background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:18px;transition:.2s}
+.camp-card:hover{border-color:var(--b2)}
+.camp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.camp-name{font-size:14px;font-weight:700}
+.camp-reach{font-size:11px;color:var(--muted);margin-bottom:10px}
+.camp-prog{height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-bottom:8px}
+.camp-fill{height:100%;border-radius:3px}
+.camp-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;padding:20px}
+.mbg.open{display:flex}
+.mod{background:#10141C;border:1px solid rgba(255,255,255,.1);border-radius:18px;
+  width:100%;max-width:500px;max-height:88vh;overflow-y:auto}
+.mh{padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:#10141C;z-index:1}
+.mh h3{font-family:var(--d);font-size:14px;font-weight:700}
+.mx{width:28px;height:28px;border-radius:7px;border:none;background:rgba(255,255,255,.07);
+  color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.mb{padding:20px;display:flex;flex-direction:column;gap:12px}
+.mf{padding:0 20px 20px;display:flex;gap:8px}
+.fl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;
+  padding:10px 13px;color:var(--text);font-family:var(--f);font-size:13px;outline:none;transition:.15s}
+.fi:focus{border-color:rgba(59,130,246,.4)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:999;
+  background:var(--s3);border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:11px 16px;font-size:13px;opacity:0;transform:translateY(6px);
+  transition:.25s;pointer-events:none;max-width:280px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-h">
+    <div class="sb-brand">
+      <div class="sb-logo">A</div>
+      <div><div class="sb-nm">ATOM OPS</div><div style="font-size:10px;color:var(--muted)">ops.atomkumpir.com</div></div>
+    </div>
+    <div class="sb-rl">📊 İşletme</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Genel</div>
+    <div class="si on" onclick="sw('dash',this)"><span class="ic">⬡</span>Dashboard</div>
+    <div class="si" onclick="sw('orders',this)"><span class="ic">📋</span>Siparişler<span class="badge">12</span></div>
+    <div class="sb-sec">Kontrol</div>
+    <div class="si" onclick="sw('markets',this)"><span class="ic">🏪</span>Pazaryerleri</div>
+    <div class="si" onclick="sw('cloud',this)"><span class="ic">☁️</span>Bulut Mutfak</div>
+    <div class="si" onclick="sw('stock',this)"><span class="ic">📦</span>Stok</div>
+    <div class="sb-sec">Teslimat</div>
+    <div class="si" onclick="sw('delivery',this)"><span class="ic">🛵</span>Teslimat Takip</div>
+    <div class="sb-sec">Müşteri</div>
+    <div class="si" onclick="sw('campaigns',this)"><span class="ic">📣</span>Kampanyalar</div>
+    <div class="si" onclick="sw('customers',this)"><span class="ic">👥</span>Müşteriler</div>
+    <div class="si" onclick="sw('reservations',this)"><span class="ic">📅</span>Rezervasyonlar</div>
+    <div class="sb-sec">Operasyon</div>
+    <div class="si" onclick="sw('payment',this)"><span class="ic">💳</span>Ödeme / Hesap</div>
+    <div class="si" onclick="sw('shift',this)"><span class="ic">⏱</span>Vardiya</div>
+    <div class="si" onclick="sw('notifications',this)"><span class="ic">🔔</span>Bildirimler<span class="badge">5</span></div>
+  </nav>
+  <div class="sb-f">
+    <div class="sb-u">
+      <div class="sb-av">S</div>
+      <div><div class="sb-un">Süpervizör</div><div class="sb-us">isletme</div></div>
+      <button class="lo" onclick="location.href='ops-login.html'">⎋</button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+<div class="topbar">
+  <span class="tb-t" id="topT">Dashboard</span>
+  <div class="tb-r">
+    <div class="live"><div class="ld"></div> CANLI</div>
+    <span class="tb-clk" id="clk">--:--</span>
+    <div class="tb-nb" onclick="sw('notifications',document.querySelector('.si:nth-child(1)'))">🔔<div class="tb-nd"></div></div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="pnl on" id="pnl-dash">
+  <div class="ph"><div><h2>Günlük Özet</h2><p>Tüm kanallar · Anlık veriler</p></div><div class="br"><button class="btn gr" onclick="toast('📥 Rapor indiriliyor...')">📥 Rapor</button></div></div>
+  <div class="sg" id="dashStats"></div>
+  <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px">
+    <div class="card">
+      <div class="ch"><h3>Saatlik Ciro</h3><span style="font-size:10px;color:var(--muted)">Bugün</span></div>
+      <div class="cb"><div id="hourlyChart"></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>Kanal Dağılımı</h3></div>
+      <div class="cb"><div id="channelChart"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><h3>Son Siparişler</h3><button class="btn" onclick="sw('orders',document.querySelectorAll('.si')[1])">Tümü →</button></div>
+    <div style="overflow-x:auto"><table class="ot" id="miniOrders"></table></div>
+  </div>
+</div>
+
+<!-- ══ ORDERS ══ -->
+<div class="pnl" id="pnl-orders">
+  <div class="ph"><div><h2>Tüm Siparişler</h2><p>Tüm kanallar · Gerçek zamanlı</p></div>
+    <div class="br">
+      <select class="fi" style="width:auto;padding:7px 12px" onchange="filterOrders(this.value)">
+        <option value="all">Tüm Kanallar</option><option value="masa">Masa</option>
+        <option value="trendyol">Trendyol</option><option value="getir">Getir</option>
+        <option value="yemeksepeti">Yemeksepeti</option><option value="whatsapp">WhatsApp</option>
+      </select>
+    </div>
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto"><table class="ot" id="ordersTable"></table></div>
+  </div>
+</div>
+
+<!-- ══ MARKETS ══ -->
+<div class="pnl" id="pnl-markets">
+  <div class="ph"><div><h2>Pazaryeri Kontrolü</h2><p>Satışa açık / kapalı · Anlık durum</p></div></div>
+  <div class="mkt-grid" id="mktGrid"></div>
+</div>
+
+<!-- ══ CLOUD KITCHEN ══ -->
+<div class="pnl" id="pnl-cloud">
+  <div class="ph"><div><h2>Bulut Mutfak Tabela</h2><p>Dijital tabela açık / kapalı yönetimi</p></div></div>
+  <div class="mkt-grid" id="cloudGrid"></div>
+</div>
+
+<!-- ══ STOCK ══ -->
+<div class="pnl" id="pnl-stock">
+  <div class="ph"><div><h2>Stok Yönetimi</h2><p>Ürünleri aç/kapat · Pazaryerlerine anlık yansır</p></div>
+    <div class="br">
+      <button class="btn dn" onclick="toggleAllStock(false)">🔴 Tümünü Kapat</button>
+      <button class="btn gr" onclick="toggleAllStock(true)">🟢 Tümünü Aç</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px" id="stockGrid"></div>
+</div>
+
+<!-- ══ DELIVERY ══ -->
+<div class="pnl" id="pnl-delivery">
+  <div class="ph"><div><h2>Teslimat Takip</h2><p>Canlı kurye durumu · WhatsApp bildirim</p></div></div>
+  <div class="del-list" id="delList"></div>
+</div>
+
+<!-- ══ CAMPAIGNS ══ -->
+<div class="pnl" id="pnl-campaigns">
+  <div class="ph"><div><h2>Kampanyalar</h2><p>WhatsApp & SMS kampanya yönetimi</p></div>
+    <button class="btn pr" onclick="openMod('campMod')">+ Yeni Kampanya</button>
+  </div>
+  <div class="camp-grid" id="campGrid"></div>
+</div>
+
+<!-- ══ CUSTOMERS ══ -->
+<div class="pnl" id="pnl-customers">
+  <div class="ph"><div><h2>Müşteriler</h2><p>CRM · WhatsApp · Sadakat puanları</p></div>
+    <button class="btn pr" onclick="toast('📤 WhatsApp toplu mesaj gönderildi!')">📤 Toplu WhatsApp</button>
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto"><table class="ot" id="custTable"></table></div>
+  </div>
+</div>
+
+<!-- ══ RESERVATIONS ══ -->
+<div class="pnl" id="pnl-reservations">
+  <div class="ph"><div><h2>Rezervasyonlar</h2><p>Masa rezervasyon yönetimi · Onay & iptal</p></div>
+    <button class="btn pr" onclick="openMod('resMod')">+ Rezervasyon Ekle</button>
+  </div>
+  <div class="res-grid" id="resGrid"></div>
+</div>
+
+<!-- ══ PAYMENT ══ -->
+<div class="pnl" id="pnl-payment">
+  <div class="ph"><div><h2>Ödeme & Tahsilat</h2><p>Masa hesapları · Hesap kapatma · Split bill</p></div>
+    <button class="btn am" onclick="toast('💳 Günlük kasa raporu: ₺18.4K')">💰 Kasa Özeti</button>
+  </div>
+  <div class="masa-pay-grid" id="masaPayGrid"></div>
+</div>
+
+<!-- ══ SHIFT ══ -->
+<div class="pnl" id="pnl-shift">
+  <div class="ph"><div><h2>Vardiya Yönetimi</h2><p>Giriş-çıkış · Aktif personel</p></div>
+    <button class="btn pr" onclick="openMod('shiftMod')">+ Vardiya Ekle</button>
+  </div>
+  <div class="card">
+    <div class="ch"><h3>Bugünkü Vardiyalar</h3><span style="font-size:11px;color:var(--green)">● 8 aktif personel</span></div>
+    <div id="shiftList"></div>
+  </div>
+</div>
+
+<!-- ══ NOTIFICATIONS ══ -->
+<div class="pnl" id="pnl-notifications">
+  <div class="ph"><div><h2>Bildirim Merkezi</h2><p>Şikayetler · Öneriler · Sistem bildirimleri</p></div>
+    <div class="br">
+      <button class="btn" onclick="renderNotifs('all')">Tümü</button>
+      <button class="btn dn" onclick="renderNotifs('complaint')">😠 Şikayet</button>
+      <button class="btn am" onclick="renderNotifs('info')">ℹ️ Bilgi</button>
+    </div>
+  </div>
+  <div class="notif-list" id="notifList"></div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- MODALS -->
+<div class="mbg" id="payMod" onclick="if(event.target===this)closeMod('payMod')">
+  <div class="mod">
+    <div class="mh"><h3 id="payModTitle">Masa Hesabı</h3><button class="mx" onclick="closeMod('payMod')">✕</button></div>
+    <div class="mb" id="payModBody"></div>
+    <div class="mf">
+      <button class="mx" style="width:auto;padding:10px 18px;font-size:12px;font-weight:700;background:rgba(255,255,255,.05)" onclick="closeMod('payMod')">İptal</button>
+      <button class="btn pr" style="flex:1;justify-content:center" onclick="closePayment()">✅ Hesabı Kapat</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="campMod" onclick="if(event.target===this)closeMod('campMod')">
+  <div class="mod">
+    <div class="mh"><h3>Yeni Kampanya</h3><button class="mx" onclick="closeMod('campMod')">✕</button></div>
+    <div class="mb">
+      <div><div class="fl">Kampanya Adı</div><input class="fi" placeholder="Hafta Sonu İndirimi"></div>
+      <div><div class="fl">Kanal</div>
+        <select class="fi"><option>WhatsApp</option><option>SMS</option><option>E-posta</option></select></div>
+      <div><div class="fl">Mesaj</div><textarea class="fi" rows="3" placeholder="Sevgili müşterimiz..."></textarea></div>
+      <div class="fg2">
+        <div><div class="fl">Hedef Kitle</div><select class="fi"><option>Tüm Müşteriler</option><option>VIP</option><option>Yeni</option></select></div>
+        <div><div class="fl">Gönderim</div><select class="fi"><option>Hemen</option><option>Planla</option></select></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="mx" style="width:auto;padding:10px 18px" onclick="closeMod('campMod')">İptal</button>
+      <button class="btn pr" style="flex:1;justify-content:center" onclick="closeMod('campMod');toast('📤 Kampanya gönderildi!')">📤 Gönder</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="resMod" onclick="if(event.target===this)closeMod('resMod')">
+  <div class="mod">
+    <div class="mh"><h3>Rezervasyon Ekle</h3><button class="mx" onclick="closeMod('resMod')">✕</button></div>
+    <div class="mb">
+      <div class="fg2">
+        <div><div class="fl">Ad Soyad</div><input class="fi" placeholder="Ahmet Yılmaz"></div>
+        <div><div class="fl">Telefon</div><input class="fi" placeholder="0532 000 00 00"></div>
+      </div>
+      <div class="fg2">
+        <div><div class="fl">Tarih</div><input class="fi" type="date"></div>
+        <div><div class="fl">Saat</div><input class="fi" type="time" value="19:30"></div>
+      </div>
+      <div class="fg2">
+        <div><div class="fl">Kişi Sayısı</div><select class="fi"><option>1</option><option>2</option><option selected>4</option><option>6</option><option>8</option></select></div>
+        <div><div class="fl">Masa</div><select class="fi"><option>Masa 1</option><option>Masa 5</option><option>Bahçe A1</option></select></div>
+      </div>
+      <div><div class="fl">Not</div><input class="fi" placeholder="Doğum günü, pencere kenarı..."></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.15);border-radius:9px">
+        <span style="font-size:18px">📱</span>
+        <span style="font-size:11px;color:var(--m2)">WhatsApp onay mesajı otomatik gönderilecek</span>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="mx" style="width:auto;padding:10px 18px" onclick="closeMod('resMod')">İptal</button>
+      <button class="btn pr" style="flex:1;justify-content:center" onclick="closeMod('resMod');toast('✅ Rezervasyon kaydedildi · WhatsApp gönderildi')">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="shiftMod" onclick="if(event.target===this)closeMod('shiftMod')">
+  <div class="mod">
+    <div class="mh"><h3>Vardiya Ekle</h3><button class="mx" onclick="closeMod('shiftMod')">✕</button></div>
+    <div class="mb">
+      <div><div class="fl">Personel</div>
+        <select class="fi"><option>Garson 1</option><option>Garson 2</option><option>Vale 1</option><option>Mutfak Şefi</option></select></div>
+      <div class="fg2">
+        <div><div class="fl">Giriş Saati</div><input class="fi" type="time" value="10:00"></div>
+        <div><div class="fl">Çıkış Saati</div><input class="fi" type="time" value="22:00"></div>
+      </div>
+      <div><div class="fl">Tarih</div><input class="fi" type="date"></div>
+    </div>
+    <div class="mf">
+      <button class="mx" style="width:auto;padding:10px 18px" onclick="closeMod('shiftMod')">İptal</button>
+      <button class="btn pr" style="flex:1;justify-content:center" onclick="closeMod('shiftMod');toast('✅ Vardiya eklendi')">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ── DATA ──
+const ORDERS = [
+  {id:'052',ch:'ctr',src:'Masa 5',items:'2x Kumpir, 1x Burger',amt:'₺378',status:'st-prep',slbl:'Hazırlanıyor',time:'2 dk'},
+  {id:'053',ch:'ctt',src:'Trendyol',items:'Double Smash, İçecek',amt:'₺304',status:'st-new',slbl:'Yeni',time:'0 dk'},
+  {id:'051',ch:'ctg',src:'Getir',items:'Waffle, Limonata',amt:'₺204',status:'st-ready',slbl:'Hazır',time:'12 dk'},
+  {id:'050',ch:'cti',src:'Instagram DM',items:'3x Kumpir',amt:'₺447',status:'st-del',slbl:'Teslimde',time:'22 dk'},
+  {id:'049',ch:'ctw',src:'WhatsApp',items:'Kumpir Spesyal',amt:'₺179',status:'st-done',slbl:'Tamam',time:'35 dk'},
+  {id:'048',ch:'ctm',src:'Masa 3',items:'Waffle, 2x Milkshake',amt:'₺329',status:'st-done',slbl:'Tamam',time:'41 dk'},
+];
+
+const MARKETS = [
+  {id:1,name:'Trendyol Yemek',ico:'🟠',color:'#FDBA74',bg:'rgba(249,115,22,.08)',orders:68,on:true},
+  {id:2,name:'Getir Yemek',ico:'🟣',color:'#C4B5FD',bg:'rgba(139,92,246,.08)',orders:52,on:true},
+  {id:3,name:'Yemeksepeti',ico:'🔴',color:'#F9A8D4',bg:'rgba(236,72,153,.08)',orders:41,on:true},
+  {id:4,name:'Migros Yemek',ico:'🟡',color:'#FCD34D',bg:'rgba(245,158,11,.08)',orders:12,on:false},
+  {id:5,name:'İstanbul Yemek',ico:'🔵',color:'#93C5FD',bg:'rgba(59,130,246,.08)',orders:8,on:true},
+];
+
+const CLOUD_KITCHENS = [
+  {id:1,name:'ATOM Kumpir',ico:'🥔',on:true,orders:34},
+  {id:2,name:'ATOM Burger',ico:'🍔',on:true,orders:28},
+  {id:3,name:'ATOM Waffle',ico:'🧇',on:false,orders:0},
+  {id:4,name:'ATOM Pizza',ico:'🍕',on:false,orders:0},
+];
+
+const STOCK_ITEMS = [
+  {id:1,name:'Kumpir Klasik',cat:'kumpir',price:149,img:'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=80&q=70&auto=format&fit=crop',on:true},
+  {id:2,name:'Kumpir Spesyal',cat:'kumpir',price:179,img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=80&q=70&auto=format&fit=crop',on:true},
+  {id:3,name:'Smash Burger',cat:'burger',price:189,img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=80&q=70&auto=format&fit=crop',on:true},
+  {id:4,name:'Double Smash',cat:'burger',price:239,img:'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=80&q=70&auto=format&fit=crop',on:true},
+  {id:5,name:'Crispy Chicken',cat:'burger',price:175,img:'https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=80&q=70&auto=format&fit=crop',on:false},
+  {id:6,name:'Waffle Tatlı',cat:'waffle',price:139,img:'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=80&q=70&auto=format&fit=crop',on:true},
+  {id:7,name:'Limonata',cat:'drink',price:65,img:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=80&q=70&auto=format&fit=crop',on:true},
+];
+
+const DELIVERIES = [
+  {id:'051',customer:'Ayşe K.',addr:'Soğanlık Mah. 14/3',phone:'0532 xxx xxxx',
+   steps:['Sipariş','Hazırlandı','Kuryeye Verildi','Yolda','Teslim'],active:3,
+   amt:'₺204',eta:'8 dk',courier:'Mehmet D.'},
+  {id:'050',customer:'Can Y.',addr:'Kartal Merkez Apt.',phone:'0541 xxx xxxx',
+   steps:['Sipariş','Hazırlandı','Kuryeye Verildi','Yolda','Teslim'],active:4,
+   amt:'₺447',eta:'Kapıda',courier:'Ali R.'},
+];
+
+const CAMPAIGNS = [
+  {name:'Cuma İndirimi %15',channel:'WhatsApp',sent:847,opened:612,conv:89,color:'#86EFAC',active:true},
+  {name:'Doğum Günü Özel',channel:'WhatsApp',sent:234,opened:198,conv:42,color:'#93C5FD',active:true},
+  {name:'Haftalık Menü',channel:'SMS',sent:1200,opened:380,conv:67,color:'#FDBA74',active:false},
+];
+
+const CUSTOMERS = [
+  {name:'Ahmet Yılmaz',phone:'0532 xxx xxxx',orders:14,spent:'₺2.840',pts:340,last:'2 gün önce',vip:true},
+  {name:'Selin Kaya',phone:'0541 xxx xxxx',orders:8,spent:'₺1.420',pts:180,last:'Dün',vip:false},
+  {name:'Murat Demir',phone:'0543 xxx xxxx',orders:22,spent:'₺4.180',pts:520,last:'Bugün',vip:true},
+  {name:'Fatma Öz',phone:'0538 xxx xxxx',orders:5,spent:'₺890',pts:95,last:'1 hafta',vip:false},
+];
+
+const RESERVATIONS = [
+  {name:'Berk Aydın',phone:'0532 xxx xxxx',date:'6 Mar',time:'19:30',pax:4,table:'Masa 7',note:'Pencere kenarı',status:'confirmed'},
+  {name:'Elif Çelik',phone:'0541 xxx xxxx',date:'7 Mar',time:'20:00',pax:2,table:'Masa 3',note:'Yıl dönümü',status:'pending'},
+  {name:'Koray Şahin',phone:'0543 xxx xxxx',date:'8 Mar',time:'13:00',pax:6,table:'Bahçe A1',note:'',status:'confirmed'},
+];
+
+const MASALAR_PAY = [
+  {no:1,pax:2,items:'Kumpir x2, Limonata x2',amt:278,status:'open'},
+  {no:2,pax:0,items:'',amt:0,status:'empty'},
+  {no:3,pax:4,items:'Smash Burger x4, Milkshake x2',amt:946,status:'open'},
+  {no:4,pax:0,items:'',amt:0,status:'empty'},
+  {no:5,pax:3,items:'Double Smash x2, Kumpir x1',amt:667,status:'open'},
+  {no:6,pax:2,items:'Waffle x2',amt:278,status:'paid'},
+  {no:7,pax:4,items:'—',amt:420,status:'open'},
+  {no:8,pax:0,items:'',amt:0,status:'empty'},
+];
+
+const SHIFTS = [
+  {name:'Ahmet G.',role:'Garson',avatar:'🧑‍🍽️',color:'#86EFAC',in:'09:00',out:'21:00',status:'ss-in',slbl:'Aktif'},
+  {name:'Selin K.',role:'Garson',avatar:'👩‍🍽️',color:'#93C5FD',in:'12:00',out:'24:00',status:'ss-in',slbl:'Aktif'},
+  {name:'Murat D.',role:'Mutfak',avatar:'👨‍🍳',color:'#FDBA74',in:'10:00',out:'22:00',status:'ss-in',slbl:'Aktif'},
+  {name:'Fatma Ö.',role:'Vale',avatar:'🚗',color:'#C4B5FD',in:'11:00',out:'23:00',status:'ss-break',slbl:'Mola'},
+  {name:'Kemal A.',role:'Garson',avatar:'🧑‍🍽️',color:'#86EFAC',in:'—',out:'—',status:'ss-out',slbl:'Dışarıda'},
+];
+
+const NOTIFS = [
+  {type:'complaint',icon:'😠',title:'Şikayet: Bekleme süresi',sub:'Masa 4 · "30 dk bekliyoruz hala servis yok"',time:'5 dk önce',unread:true},
+  {type:'complaint',icon:'⚠️',title:'Şikayet: Ürün kalitesi',sub:'Trendyol sipariş #047 · "Burger soğuk gelmişti"',time:'18 dk önce',unread:true},
+  {type:'info',icon:'📋',title:'Yeni rezervasyon',sub:'Berk Aydın · 6 Mar 19:30 · 4 kişi',time:'32 dk önce',unread:true},
+  {type:'info',icon:'🛵',title:'Kurye teslim etti',sub:'Sipariş #049 · Can Y. · Kartal Merkez',time:'41 dk önce',unread:false},
+  {type:'info',icon:'🟢',title:'Trendyol sync tamamlandı',sub:'12 ürün güncellendi · Stok senkronize',time:'1 sa önce',unread:false},
+];
+
+let allOrders = ORDERS, notifFilter = 'all';
+
+// ── RENDERS ──
+function renderDash() {
+  document.getElementById('dashStats').innerHTML = `
+    <div class="sc sr"><div class="sl">Günlük Ciro</div><div class="sv sv-r">₺18.4K</div><div class="sd">▲ %23 dün</div></div>
+    <div class="sc sg2"><div class="sl">Sipariş</div><div class="sv sv-g">247</div><div class="sd">5 aktif kanal</div></div>
+    <div class="sc sb2"><div class="sl">Ortalama Sepet</div><div class="sv sv-b">₺74.5</div><div class="sd">Direkt ₺82</div></div>
+    <div class="sc sa"><div class="sl">Aktif Masa</div><div class="sv sv-a">7/12</div><div class="sd">%58 doluluk</div></div>`;
+
+  const hours = [8,12,18,34,42,56,71,85,62,48,38,22];
+  const mx = Math.max(...hours);
+  document.getElementById('hourlyChart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:5px;height:80px">
+    ${hours.map((v,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+      <div style="width:100%;background:${v===mx?'var(--red)':'rgba(232,57,14,.3)'};border-radius:3px 3px 0 0;height:${(v/mx)*70}px;transition:.4s"></div>
+      <span style="font-size:9px;color:var(--muted)">${10+i}</span>
+    </div>`).join('')}
+  </div>`;
+
+  const channels = [{n:'Masa',v:35,c:'var(--red)'},{n:'Trendyol',v:28,c:'#FDBA74'},{n:'Getir',v:21,c:'#C4B5FD'},{n:'Diğer',v:16,c:'#6B7280'}];
+  document.getElementById('channelChart').innerHTML = channels.map(c=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:600">${c.n}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:${c.c}">%${c.v}</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px">
+        <div style="height:100%;width:${c.v}%;background:${c.c};border-radius:3px"></div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('miniOrders').innerHTML = `
+    <thead><tr><th>#</th><th>Kaynak</th><th>Ürünler</th><th>Tutar</th><th>Durum</th></tr></thead>
+    <tbody>${ORDERS.slice(0,5).map(o=>`<tr>
+      <td style="font-family:var(--mono);color:var(--muted)">#${o.id}</td>
+      <td><span class="ch-tag ${o.ch}">${o.src}</span></td>
+      <td style="color:var(--m2)">${o.items}</td>
+      <td style="font-family:var(--mono);font-weight:600">${o.amt}</td>
+      <td><span class="st-tag ${o.status}">${o.slbl}</span></td>
+    </tr>`).join('')}</tbody>`;
+}
+
+function renderOrders(filter='all') {
+  const filtered = filter==='all' ? allOrders : allOrders.filter(o=>o.src.toLowerCase().includes(filter));
+  document.getElementById('ordersTable').innerHTML = `
+    <thead><tr><th>#</th><th>Kaynak</th><th>Ürünler</th><th>Tutar</th><th>Durum</th><th>Süre</th><th>İşlem</th></tr></thead>
+    <tbody>${filtered.map(o=>`<tr>
+      <td style="font-family:var(--mono);color:var(--muted)">#${o.id}</td>
+      <td><span class="ch-tag ${o.ch}">${o.src}</span></td>
+      <td style="color:var(--m2);font-size:11px">${o.items}</td>
+      <td style="font-family:var(--mono);font-weight:600">${o.amt}</td>
+      <td><span class="st-tag ${o.status}">${o.slbl}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${o.time}</td>
+      <td><button class="btn" style="padding:4px 9px;font-size:10px" onclick="toast('Sipariş #${o.id} detayı')">Detay</button></td>
+    </tr>`).join('')}</tbody>`;
+}
+function filterOrders(v){renderOrders(v)}
+
+function renderMarkets() {
+  document.getElementById('mktGrid').innerHTML = MARKETS.map(m=>`
+    <div class="mkt-card" style="border-color:${m.on?'rgba(34,197,94,.2)':''};background:${m.on?'rgba(34,197,94,.04)':''}">
+      <div class="mkt-info">
+        <div class="mkt-ico" style="background:${m.bg}">${m.ico}</div>
+        <div>
+          <div class="mkt-name">${m.name}</div>
+          <div class="mkt-orders">${m.on?m.orders+' sipariş bugün':'Kapalı'}</div>
+        </div>
+      </div>
+      <button class="tog ${m.on?'on':'off'}" id="mk-${m.id}" onclick="toggleMkt(${m.id})"></button>
+    </div>`).join('');
+}
+
+function toggleMkt(id) {
+  const m = MARKETS.find(x=>x.id===id);
+  m.on=!m.on;
+  renderMarkets();
+  toast(`${m.on?'🟢':'🔴'} ${m.name} ${m.on?'açıldı':'kapatıldı'}`);
+}
+
+function renderCloud() {
+  document.getElementById('cloudGrid').innerHTML = CLOUD_KITCHENS.map(k=>`
+    <div class="mkt-card" style="border-color:${k.on?'rgba(34,197,94,.2)':''}">
+      <div class="mkt-info">
+        <div class="mkt-ico" style="font-size:22px">${k.ico}</div>
+        <div>
+          <div class="mkt-name">${k.name}</div>
+          <div class="mkt-orders">${k.on?k.orders+' aktif sipariş':'Tabela kapalı'}</div>
+        </div>
+      </div>
+      <button class="tog ${k.on?'on':'off'}" onclick="toggleCloud(${k.id})"></button>
+    </div>`).join('');
+}
+
+function toggleCloud(id) {
+  const k = CLOUD_KITCHENS.find(x=>x.id===id);
+  k.on=!k.on;
+  renderCloud();
+  toast(`${k.on?'🟢':'🔴'} ${k.name} tabela ${k.on?'açıldı':'kapatıldı'}`);
+}
+
+function renderStock() {
+  document.getElementById('stockGrid').innerHTML = STOCK_ITEMS.map(item=>`
+    <div style="background:var(--s1);border:1px solid ${item.on?'var(--border)':'rgba(239,68,68,.2)'};
+      border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;transition:.2s">
+      <img src="${item.img}" style="width:48px;height:48px;border-radius:9px;object-fit:cover;
+        flex-shrink:0;${item.on?'':'filter:grayscale(80%)'}">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;margin-bottom:1px">${item.name}</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--red)">₺${item.price}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <button class="tog ${item.on?'on':'off'}" onclick="toggleStock(${item.id})"></button>
+        <span style="font-size:9px;font-weight:700;color:${item.on?'#4ADE80':'#EF4444'}">${item.on?'AKTİF':'KAPALI'}</span>
+      </div>
+    </div>`).join('');
+}
+function toggleAllStock(on){ STOCK_ITEMS.forEach(i=>i.on=on); renderStock(); toast(on?'🟢 Tüm ürünler açıldı':'🔴 Tüm ürünler kapatıldı'); }
+function toggleStock(id){ const i=STOCK_ITEMS.find(x=>x.id===id);i.on=!i.on;renderStock();toast(`${i.on?'🟢':'🔴'} "${i.name}" ${i.on?'açıldı':'kapatıldı'}`); }
+
+function renderDelivery() {
+  document.getElementById('delList').innerHTML = DELIVERIES.map(d=>`
+    <div class="del-card">
+      <div class="del-top">
+        <div>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">#${d.id}</span>
+          <span style="font-size:14px;font-weight:700;margin-left:10px">${d.customer}</span>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${d.addr}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--red)">${d.amt}</div>
+          <div style="font-size:11px;color:${d.eta==='Kapıda'?'#4ADE80':'var(--muted)'}">⏱ ${d.eta}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">🛵 ${d.courier}</div>
+        </div>
+      </div>
+      <div class="del-steps">
+        ${d.steps.map((s,i)=>`<div class="ds ${i<d.active?'done':i===d.active?'act':''}">
+          <div class="dsc">${i<d.active?'✓':i===d.active?'●':''}</div>
+          <div class="ds-lbl">${s}</div>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn wa" onclick="sendWA('${d.customer}','${d.addr}')">📱 WA Bildir</button>
+        <button class="btn" onclick="toast('🗺 Konum paylaşıldı')">🗺 Konum</button>
+        <button class="btn gr" onclick="toast('✅ Teslim edildi olarak işaretlendi')">✅ Teslim Edildi</button>
+      </div>
+    </div>`).join('');
+}
+
+function sendWA(name, addr) {
+  const msg = encodeURIComponent(`Sayın ${name}, siparişiniz yola çıktı! 🛵\nAdres: ${addr}\nTakip için bildirim alacaksınız. İyi günler! 🧡\nATOM Kumpir & Waffle`);
+  window.open(`https://api.whatsapp.com/send?phone=905359777275&text=${msg}`,'_blank');
+}
+
+function renderCampaigns() {
+  document.getElementById('campGrid').innerHTML = CAMPAIGNS.map(c=>`
+    <div class="camp-card">
+      <div class="camp-top">
+        <span class="camp-name">${c.name}</span>
+        <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;
+          background:${c.active?'rgba(34,197,94,.1)':'rgba(100,116,139,.1)'};
+          color:${c.active?'#4ADE80':'#94A3B8'}">${c.active?'Aktif':'Bitti'}</span>
+      </div>
+      <div class="camp-reach">📱 ${c.channel} · ${c.sent.toLocaleString()} kişiye gönderildi</div>
+      <div class="camp-prog"><div class="camp-fill" style="width:${c.conv/c.sent*100*3}%;background:${c.color}"></div></div>
+      <div class="camp-foot">
+        <span>📬 Açılma: ${Math.round(c.opened/c.sent*100)}%</span>
+        <span>🛒 Dönüşüm: ${c.conv}</span>
+      </div>
+      <div style="display:flex;gap:7px;margin-top:12px">
+        <button class="btn wa" onclick="toast('📤 Tekrar gönderildi')">📱 WA Gönder</button>
+        <button class="btn" onclick="toast('📊 Rapor görüntüleniyor')">Rapor</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderCustomers() {
+  document.getElementById('custTable').innerHTML = `
+    <thead><tr><th>Müşteri</th><th>Telefon</th><th>Sipariş</th><th>Harcama</th><th>Puan</th><th>Son</th><th>İşlem</th></tr></thead>
+    <tbody>${CUSTOMERS.map(c=>`<tr>
+      <td><strong>${c.name}</strong>${c.vip?'<span style="margin-left:6px;font-size:9px;font-weight:700;padding:2px 6px;background:rgba(250,204,21,.12);color:#FACC15;border-radius:4px">VIP</span>':''}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${c.phone}</td>
+      <td style="font-family:var(--mono)">${c.orders}</td>
+      <td style="font-family:var(--mono);color:var(--red)">${c.spent}</td>
+      <td><span style="font-family:var(--mono);font-size:11px;color:#FACC15">⭐ ${c.pts}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${c.last}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn" style="padding:4px 8px;font-size:10px" onclick="sendWA('${c.name}','')">📱</button>
+        <button class="btn" style="padding:4px 8px;font-size:10px" onclick="toast('Profil: ${c.name}')">Profil</button>
+      </div></td>
+    </tr>`).join('')}</tbody>`;
+}
+
+function renderReservations() {
+  const colors = {confirmed:'rgba(34,197,94,.15)',pending:'rgba(245,158,11,.1)'};
+  const textColors = {confirmed:'#4ADE80',pending:'#FCD34D'};
+  document.getElementById('resGrid').innerHTML = RESERVATIONS.map(r=>`
+    <div class="res-card">
+      <div class="res-head">
+        <div>
+          <div class="res-name">${r.name}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">📞 ${r.phone}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px;
+          background:${colors[r.status]};color:${textColors[r.status]}">${r.status==='confirmed'?'✓ Onaylı':'⏳ Bekliyor'}</span>
+      </div>
+      <div class="res-detail">
+        📅 ${r.date} · ⏰ ${r.time}<br>
+        👥 ${r.pax} kişi · 🪑 ${r.table}
+        ${r.note?`<br>📝 ${r.note}`:''}
+      </div>
+      <div class="res-actions">
+        ${r.status==='pending'?`<button class="btn gr" onclick="toast('✅ Rezervasyon onaylandı')">✅ Onayla</button>`:''}
+        <button class="btn wa" onclick="sendWA('${r.name}','')">📱 WA Gönder</button>
+        <button class="btn dn" onclick="toast('❌ Rezervasyon iptal edildi')">İptal</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderMasaPay() {
+  document.getElementById('masaPayGrid').innerHTML = MASALAR_PAY.map(m=>`
+    <div class="mp-card ${m.status==='open'?'open-bill':m.status==='paid'?'paid':''}"
+      onclick="${m.status==='open'?`openPayModal(${m.no})`:''}" style="${m.status==='empty'?'opacity:.4':''}">
+      <div class="mp-no">${m.no}</div>
+      ${m.status!=='empty'?`<div style="font-size:11px;color:var(--muted);margin-bottom:4px">👥 ${m.pax} kişi</div>
+      <div class="mp-amt">${m.status==='empty'?'—':'₺'+m.amt}</div>`:'<div style="font-size:11px;color:var(--muted)">Boş masa</div>'}
+      <span class="mp-status ${m.status==='open'?'mps-open':m.status==='paid'?'mps-paid':'mps-empty'}">
+        ${m.status==='open'?'Açık Hesap':m.status==='paid'?'✓ Ödendi':'Boş'}
+      </span>
+    </div>`).join('');
+}
+
+function openPayModal(no) {
+  const m = MASALAR_PAY.find(x=>x.no===no);
+  document.getElementById('payModTitle').textContent = 'Masa '+no+' Hesabı';
+  document.getElementById('payModBody').innerHTML = `
+    <div style="background:var(--s2);border-radius:12px;padding:16px;margin-bottom:4px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${m.items}</div>
+      <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)">
+        <span style="font-size:14px;font-weight:700">Toplam</span>
+        <span style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--red)">₺${m.amt}</span>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);margin:8px 0 6px;letter-spacing:1px;text-transform:uppercase">Ödeme Yöntemi</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      ${['💳 Kredi','🍽️ Yemek','💵 Nakit','✂️ Bölüşümlü','⭐ Puanla','📱 QR'].map(p=>`
+      <button onclick="selectPay(this)" style="padding:10px;border-radius:9px;border:1px solid var(--border);
+        background:transparent;color:var(--m2);font-size:11px;font-weight:600;cursor:pointer;
+        font-family:var(--f);transition:.15s">${p}</button>`).join('')}
+    </div>`;
+  openMod('payMod');
+}
+
+function selectPay(btn) {
+  document.querySelectorAll('#payModBody button').forEach(b=>b.style.background='');
+  btn.style.background='var(--rd)'; btn.style.color='var(--red)'; btn.style.borderColor='var(--rg)';
+}
+
+function closePayment() {
+  closeMod('payMod');
+  toast('✅ Hesap kapatıldı · Fiş yazdırılıyor...');
+}
+
+function renderShift() {
+  document.getElementById('shiftList').innerHTML = SHIFTS.map(s=>`
+    <div class="shift-row">
+      <div class="shift-av" style="background:rgba(255,255,255,.05)">${s.avatar}</div>
+      <div style="flex:1">
+        <div class="shift-name">${s.name}</div>
+        <div class="shift-role">${s.role}</div>
+      </div>
+      <div class="shift-time">${s.in} — ${s.out}</div>
+      <span class="shift-status ${s.status}">${s.slbl}</span>
+    </div>`).join('');
+}
+
+function renderNotifs(filter='all') {
+  notifFilter = filter;
+  const f = filter==='all' ? NOTIFS : NOTIFS.filter(n=>n.type===filter);
+  document.getElementById('notifList').innerHTML = f.map(n=>`
+    <div class="notif-item ${n.unread?'unread':''}">
+      <div class="ni-icon">${n.icon}</div>
+      <div class="ni-body">
+        <div class="ni-title">${n.title}</div>
+        <div class="ni-sub">${n.sub}</div>
+        <div class="ni-time">${n.time}</div>
+        <div class="ni-actions">
+          <button class="ni-btn wa" onclick="toast('📱 WhatsApp açılıyor...')">📱 WhatsApp ile İlet</button>
+          <button class="ni-btn" onclick="toast('✓ Görüldü olarak işaretlendi')">Görüldü</button>
+          ${n.type==='complaint'?`<button class="ni-btn" style="color:var(--red);border-color:var(--rg)" onclick="toast('Şikayet üzerine aksyon alındı')">Aksiyon Al</button>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── MODAL ──
+function openMod(id){document.getElementById(id).classList.add('open')}
+function closeMod(id){document.getElementById(id).classList.remove('open')}
+
+// ── PANEL SWITCH ──
+const TITLES = {dash:'Dashboard',orders:'Tüm Siparişler',markets:'Pazaryeri Kontrolü',
+  cloud:'Bulut Mutfak',stock:'Stok Yönetimi',delivery:'Teslimat Takip',
+  campaigns:'Kampanyalar',customers:'Müşteriler',reservations:'Rezervasyonlar',
+  payment:'Ödeme & Tahsilat',shift:'Vardiya Yönetimi',notifications:'Bildirim Merkezi'};
+
+function sw(id, el) {
+  document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.si').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pnl-'+id).classList.add('on');
+  el.classList.add('on');
+  document.getElementById('topT').textContent = TITLES[id]||id;
+}
+
+// ── TOAST ──
+function toast(msg){
+  const t=document.getElementById('toastEl');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── CLOCK ──
+setInterval(()=>{
+  const n=new Date();
+  document.getElementById('clk').textContent=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+},1000);
+
+// ── INIT ──
+renderDash(); renderOrders(); renderMarkets(); renderCloud(); renderStock();
+renderDelivery(); renderCampaigns(); renderCustomers(); renderReservations();
+renderMasaPay(); renderShift(); renderNotifs();
+</script>
+</body>
+</html>

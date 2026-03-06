@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ATOM OPS · Mutfak</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Figtree:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06070A;--s1:#0D0F14;--s2:#12161E;
+  --border:rgba(255,255,255,.07);--text:#ECF0F8;--muted:#4E5670;
+  --red:#E8390E;--amber:#F59E0B;--green:#22C55E;--blue:#3B82F6;
+  --f:'Figtree',sans-serif;--d:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f);overflow:hidden}
+
+/* TOPBAR */
+.topbar{height:56px;background:var(--s1);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-logo{width:36px;height:36px;background:var(--red);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--d);font-size:18px;font-weight:800;color:#fff}
+.tb-name{font-family:var(--d);font-size:15px;font-weight:800}
+.tb-role{font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 9px;
+  background:rgba(245,158,11,.12);color:var(--amber);border-radius:5px}
+.tb-r{display:flex;align-items:center;gap:12px}
+.tb-clk{font-family:var(--mono);font-size:14px;color:var(--muted)}
+.live{display:flex;align-items:center;gap:5px;background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.15);border-radius:20px;padding:4px 10px;
+  font-size:10px;font-weight:700;color:#4ADE80}
+.ld{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* MAIN */
+.main{height:calc(100vh - 56px);display:flex;flex-direction:column;overflow:hidden}
+
+/* FILTER BAR */
+.fbar{padding:10px 22px;background:var(--s1);border-bottom:1px solid var(--border);
+  display:flex;gap:8px;align-items:center;flex-shrink:0}
+.fbtn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f);transition:.15s}
+.fbtn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.fbtn.on{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.1);color:#93C5FD}
+.fbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.stat-chip{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:7px;
+  background:var(--s2);border:1px solid var(--border);font-size:11px;font-weight:700}
+
+/* COLUMNS */
+.cols{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;overflow:hidden}
+.col{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden}
+.col:last-child{border:none}
+.col-head{padding:12px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.col-title{font-family:var(--d);font-size:13px;font-weight:800;display:flex;align-items:center;gap:8px}
+.col-dot{width:9px;height:9px;border-radius:50%}
+.col-cnt{font-family:var(--mono);font-size:11px;color:var(--muted);
+  background:rgba(255,255,255,.05);border-radius:5px;padding:2px 8px}
+.col-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:none}
+.col-body::-webkit-scrollbar{display:none}
+
+/* TICKET */
+.tk{border-radius:14px;border:1px solid var(--border);background:var(--s1);
+  overflow:hidden;animation:slip .3s cubic-bezier(.2,0,.2,1);transition:transform .15s}
+.tk:hover{transform:translateY(-1px)}
+@keyframes slip{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.tk.vip{border-color:rgba(250,204,21,.4);box-shadow:0 0 16px rgba(250,204,21,.08)}
+.tk.urgent{border-color:rgba(239,68,68,.4);animation:slip .3s, urgentPulse 2s infinite}
+@keyframes urgentPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)}50%{box-shadow:0 0 0 6px transparent}}
+
+.tk-head{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);
+  display:flex;align-items:center;gap:8px}
+.tk-no{font-family:var(--mono);font-size:14px;font-weight:600}
+.tk-src{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700}
+.ts-masa{background:rgba(232,57,14,.12);color:var(--red)}
+.ts-tr{background:rgba(249,115,22,.1);color:#FDBA74}
+.ts-gt{background:rgba(139,92,246,.1);color:#C4B5FD}
+.ts-ys{background:rgba(236,72,153,.1);color:#F9A8D4}
+.ts-wa{background:rgba(34,197,94,.1);color:#86EFAC}
+.tk-vip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;
+  background:rgba(250,204,21,.15);color:#FACC15;margin-left:auto}
+.tk-timer{margin-left:auto;display:flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:12px;font-weight:600}
+.tk-timer.warn{color:var(--amber)}.tk-timer.crit{color:var(--red)}
+
+.tk-items{padding:10px 14px}
+.tk-item{display:flex;align-items:center;justify-content:space-between;
+  padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.tk-item:last-child{border:none}
+.tk-item-name{font-weight:600}
+.tk-item-qty{font-family:var(--mono);font-size:11px;font-weight:700;
+  background:rgba(255,255,255,.07);border-radius:4px;padding:2px 7px;color:var(--muted)}
+.tk-note{font-size:11px;color:var(--amber);padding:0 14px 8px;font-style:italic}
+
+.tk-foot{padding:8px 14px;border-top:1px solid rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:space-between}
+.tk-btns{display:flex;gap:6px}
+.tk-btn{padding:6px 12px;border-radius:7px;border:none;font-family:var(--f);
+  font-size:11px;font-weight:700;cursor:pointer;transition:.15s;letter-spacing:.3px}
+.tb-start{background:rgba(59,130,246,.15);color:#93C5FD;border:1px solid rgba(59,130,246,.25)}
+.tb-start:hover{background:rgba(59,130,246,.25)}
+.tb-done{background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)}
+.tb-done:hover{background:rgba(34,197,94,.22)}
+.tb-print{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)}
+.tb-print:hover{background:rgba(255,255,255,.1)}
+.tb-notify{background:rgba(232,57,14,.1);color:var(--red);border:1px solid rgba(232,57,14,.2)}
+.tb-notify:hover{background:rgba(232,57,14,.2)}
+
+/* STOK BAR */
+.stok-bar{background:var(--s1);border-top:1px solid var(--border);padding:10px 22px;
+  display:flex;align-items:center;gap:12px;flex-shrink:0}
+.sb-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px}
+.sb-items{display:flex;gap:8px;flex:1;overflow-x:auto;scrollbar-width:none}
+.sb-items::-webkit-scrollbar{display:none}
+.si-chip{display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:7px;
+  background:var(--s2);border:1px solid var(--border);font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer}
+.si-chip.low{border-color:rgba(245,158,11,.3);color:var(--amber)}
+.si-chip.out{border-color:rgba(239,68,68,.3);color:#FCA5A5;background:rgba(239,68,68,.06)}
+
+/* GARSON NOTIF PANEL */
+.gn-panel{position:fixed;right:0;top:56px;bottom:0;width:280px;
+  background:var(--s1);border-left:1px solid var(--border);
+  transform:translateX(100%);transition:.3s cubic-bezier(.2,0,.2,1);
+  display:flex;flex-direction:column;z-index:100}
+.gn-panel.open{transform:translateX(0)}
+.gn-head{padding:14px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.gn-title{font-family:var(--d);font-size:13px;font-weight:700}
+.gn-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px}
+.gn-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.gn-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px}
+.gn-item.new{border-color:rgba(232,57,14,.35);animation:gnNew .5s ease}
+@keyframes gnNew{0%{background:rgba(232,57,14,.12)}100%{background:var(--s2)}}
+.gn-top{display:flex;justify-content:space-between;margin-bottom:5px}
+.gn-masa{font-size:13px;font-weight:700}
+.gn-time{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.gn-msg{font-size:12px;color:var(--muted)}
+.gn-btn{margin-top:8px;width:100%;padding:7px;border-radius:7px;
+  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);
+  color:#86EFAC;font-family:var(--f);font-size:11px;font-weight:700;cursor:pointer}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--s2);border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:11px 18px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;
+  z-index:999;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* NOTIF BTN badge */
+.nb-wrap{position:relative}
+.nb-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;
+  background:var(--red);border:2px solid var(--bg)}
+</style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;height:100vh">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">A</div>
+    <div>
+      <div class="tb-name">ATOM OPS</div>
+      <div class="tb-role">🍳 MUTFAK</div>
+    </div>
+  </div>
+  <div class="tb-r">
+    <div class="live"><div class="ld"></div>CANLI</div>
+    <span class="tb-clk" id="clk">--:--:--</span>
+    <div class="nb-wrap">
+      <button class="fbtn" style="font-size:13px;padding:7px 12px" onclick="toggleGN()">🔔 Garson</button>
+      <div class="nb-dot" id="gnDot"></div>
+    </div>
+    <button class="fbtn" onclick="location.href='ops-login.html'">⎋ Çıkış</button>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="fbar">
+  <button class="fbtn on" onclick="filterTix('all',this)">Tümü</button>
+  <button class="fbtn" onclick="filterTix('masa',this)">🪑 Masa</button>
+  <button class="fbtn" onclick="filterTix('trendyol',this)">🟠 Trendyol</button>
+  <button class="fbtn" onclick="filterTix('getir',this)">🟣 Getir</button>
+  <button class="fbtn" onclick="filterTix('diger',this)">📦 Diğer</button>
+  <div class="fbar-right">
+    <div class="stat-chip" style="color:var(--red)">🔴 Yeni: <strong id="cntNew">0</strong></div>
+    <div class="stat-chip" style="color:var(--amber)">🟡 Hazırlanan: <strong id="cntPrep">0</strong></div>
+    <div class="stat-chip" style="color:var(--green)">🟢 Hazır: <strong id="cntReady">0</strong></div>
+  </div>
+</div>
+
+<!-- COLUMNS -->
+<div class="main">
+  <div class="cols">
+    <div class="col">
+      <div class="col-head">
+        <div class="col-title"><div class="col-dot" style="background:var(--red)"></div>Yeni Siparişler</div>
+        <span class="col-cnt" id="colCntNew">0</span>
+      </div>
+      <div class="col-body" id="colNew"></div>
+    </div>
+    <div class="col">
+      <div class="col-head">
+        <div class="col-title"><div class="col-dot" style="background:var(--amber)"></div>Hazırlanıyor</div>
+        <span class="col-cnt" id="colCntPrep">0</span>
+      </div>
+      <div class="col-body" id="colPrep"></div>
+    </div>
+    <div class="col">
+      <div class="col-head">
+        <div class="col-title"><div class="col-dot" style="background:var(--green)"></div>Hazır / Servis</div>
+        <span class="col-cnt" id="colCntReady">0</span>
+      </div>
+      <div class="col-body" id="colReady"></div>
+    </div>
+  </div>
+
+  <!-- STOK BAR -->
+  <div class="stok-bar">
+    <span class="sb-title">STOK</span>
+    <div class="sb-items" id="stokBar"></div>
+    <button class="fbtn" onclick="toast('📦 Stok güncelleniyor...')">Güncelle</button>
+  </div>
+</div>
+
+</div><!-- /flex col -->
+
+<!-- GARSON PANEL -->
+<div class="gn-panel" id="gnPanel">
+  <div class="gn-head">
+    <span class="gn-title">🔔 Garson Bildirimleri</span>
+    <button class="gn-x" onclick="toggleGN()">✕</button>
+  </div>
+  <div class="gn-body" id="gnBody"></div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ── DATA ──
+let TICKETS = [
+  {id:'052',src:'masa',srcLbl:'Masa 5',srcCls:'ts-masa',vip:true,urgent:false,
+   items:[{n:'Kumpir Spesyal',q:2},{n:'Smash Burger',q:1},{n:'Limonata',q:2}],
+   note:'Acısız, sos ayrı',status:'new',elapsed:0,timer:null},
+  {id:'053',src:'trendyol',srcLbl:'Trendyol',srcCls:'ts-tr',vip:false,urgent:false,
+   items:[{n:'Double Smash',q:1},{n:'Milkshake',q:1}],
+   note:'',status:'new',elapsed:0,timer:null},
+  {id:'051',src:'getir',srcLbl:'Getir',srcCls:'ts-gt',vip:false,urgent:false,
+   items:[{n:'Waffle Tatlı',q:2},{n:'Limonata',q:1}],
+   note:'',status:'prep',elapsed:480,timer:null},
+  {id:'050',src:'masa',srcLbl:'Masa 3',srcCls:'ts-masa',vip:false,urgent:true,
+   items:[{n:'Kumpir Klasik',q:3}],
+   note:'ACELE - VIP masa',status:'prep',elapsed:720,timer:null},
+  {id:'049',src:'whatsapp',srcLbl:'WhatsApp',srcCls:'ts-wa',vip:false,urgent:false,
+   items:[{n:'Kumpir Spesyal',q:1},{n:'Smash Burger',q:2}],
+   note:'',status:'ready',elapsed:1140,timer:null},
+];
+
+const STOK = [
+  {name:'Kumpir Klasik',level:'ok'},{name:'Double Smash',level:'low'},
+  {name:'Crispy Chicken',level:'out'},{name:'Waffle',level:'ok'},
+  {name:'Milkshake',level:'low'},{name:'Limonata',level:'ok'},
+];
+
+const GN_NOTIFS = [
+  {masa:'Masa 5',msg:'Garson çağrısı',time:'2 dk önce',new:true},
+  {masa:'Masa 3',msg:'Sipariş Hazır - Servis et',time:'8 dk önce',new:false},
+];
+
+let ticketFilter = 'all';
+
+// ── TIMER ──
+setInterval(()=>{
+  TICKETS.filter(t=>t.status!=='ready').forEach(t=>t.elapsed++);
+  renderAll();
+  updateCounts();
+}, 1000);
+
+function fmtTime(s) {
+  const m=Math.floor(s/60),ss=s%60;
+  return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+}
+
+function timerColor(s) {
+  if(s>900) return 'crit';
+  if(s>480) return 'warn';
+  return '';
+}
+
+// ── RENDER ──
+function renderAll() {
+  const f = ticketFilter==='all' ? TICKETS : TICKETS.filter(t=>t.src===ticketFilter||t.srcLbl.toLowerCase().includes(ticketFilter));
+  
+  ['new','prep','ready'].forEach(status=>{
+    const col = f.filter(t=>t.status===status);
+    const cont = document.getElementById('col'+status.charAt(0).toUpperCase()+status.slice(1));
+    if(!cont) return;
+    cont.innerHTML = col.map(t=>buildTicket(t)).join('');
+    document.getElementById('colCnt'+status.charAt(0).toUpperCase()+status.slice(1)).textContent = col.length;
+  });
+}
+
+function buildTicket(t) {
+  const tc = timerColor(t.elapsed);
+  return `<div class="tk${t.vip?' vip':''}${t.urgent?' urgent':''}">
+    <div class="tk-head">
+      <span class="tk-no">#${t.id}</span>
+      <span class="tk-src ${t.srcCls}">${t.srcLbl}</span>
+      ${t.vip?'<span class="tk-vip">⭐ VIP</span>':''}
+      <span class="tk-timer ${tc}" style="margin-left:${t.vip?'0':'auto'}">${fmtTime(t.elapsed)}</span>
+    </div>
+    <div class="tk-items">
+      ${t.items.map(i=>`<div class="tk-item">
+        <span class="tk-item-name">${i.n}</span>
+        <span class="tk-item-qty">×${i.q}</span>
+      </div>`).join('')}
+    </div>
+    ${t.note?`<div class="tk-note">📝 ${t.note}</div>`:''}
+    <div class="tk-foot">
+      <div class="tk-btns">
+        ${t.status==='new'?`<button class="tk-btn tb-start" onclick="moveTicket('${t.id}','prep')">Başla →</button>`:''}
+        ${t.status==='prep'?`<button class="tk-btn tb-done" onclick="moveTicket('${t.id}','ready')">✓ Hazır</button>`:''}
+        ${t.status==='ready'?`<button class="tk-btn tb-notify" onclick="notifyWaiter('${t.id}','${t.srcLbl}')">🔔 Garson Çağır</button>
+          <button class="tk-btn tb-done" onclick="completeTicket('${t.id}')">✓ Servis</button>`:''}
+        <button class="tk-btn tb-print" onclick="toast('🖨️ #${t.id} yazdırıldı')">🖨️</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function moveTicket(id, status) {
+  const t = TICKETS.find(x=>x.id===id);
+  t.status = status;
+  renderAll();
+  updateCounts();
+  if(status==='ready') toast(`✅ #${t.id} hazır! Garson bilgilendirildi`);
+}
+
+function completeTicket(id) {
+  TICKETS = TICKETS.filter(t=>t.id!==id);
+  renderAll();
+  updateCounts();
+  toast('🍽️ Servis edildi · Sipariş tamamlandı');
+}
+
+function notifyWaiter(id, src) {
+  toast(`🔔 "${src}" için garson çağrıldı`);
+  GN_NOTIFS.unshift({masa:src,msg:'Sipariş Hazır - Servis et',time:'şimdi',new:true});
+  renderGN();
+  document.getElementById('gnDot').style.display='block';
+}
+
+function filterTix(f, el) {
+  ticketFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  renderAll();
+}
+
+function updateCounts() {
+  ['new','prep','ready'].forEach(s=>{
+    const cnt = TICKETS.filter(t=>t.status===s).length;
+    const el = document.getElementById('cnt'+s.charAt(0).toUpperCase()+s.slice(1));
+    if(el) el.textContent = cnt;
+  });
+}
+
+function renderStok() {
+  document.getElementById('stokBar').innerHTML = STOK.map(s=>`
+    <div class="si-chip ${s.level==='low'?'low':s.level==='out'?'out':''}"
+      onclick="toast('${s.name}: ${s.level==='out'?'❌ Tükendi':s.level==='low'?'⚠️ Az kaldı':'✅ Stok tamam'}')" >
+      ${s.level==='out'?'❌':s.level==='low'?'⚠️':'✅'} ${s.name}
+    </div>`).join('');
+}
+
+function renderGN() {
+  document.getElementById('gnBody').innerHTML = GN_NOTIFS.map(n=>`
+    <div class="gn-item ${n.new?'new':''}">
+      <div class="gn-top">
+        <span class="gn-masa">${n.masa}</span>
+        <span class="gn-time">${n.time}</span>
+      </div>
+      <div class="gn-msg">${n.msg}</div>
+      <button class="gn-btn" onclick="toast('✅ Garson bilgilendirildi')">✓ Garson Bilgilendir</button>
+    </div>`).join('');
+}
+
+function toggleGN() {
+  const p = document.getElementById('gnPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')) {
+    document.getElementById('gnDot').style.display='none';
+    GN_NOTIFS.forEach(n=>n.new=false);
+    renderGN();
+  }
+}
+
+function toast(msg) {
+  const t=document.getElementById('toastEl');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+setInterval(()=>{
+  document.getElementById('clk').textContent=new Date().toLocaleTimeString('tr-TR');
+},1000);
+
+// ── INIT ──
+renderAll();
+renderStok();
+renderGN();
+updateCounts();
+
+// localStorage broadcast listener
+window.addEventListener('storage', e => {
+  if(e.key==='atom_broadcast') {
+    try {
+      const data = JSON.parse(e.newValue);
+      if(data.type==='garson') {
+        GN_NOTIFS.unshift({masa:'Masa '+data.masa,msg:'Garson çağrısı',time:'şimdi',new:true});
+        renderGN();
+        document.getElementById('gnDot').style.display='block';
+        toast('🔔 Masa '+data.masa+' garson çağırdı!');
+      }
+    } catch(err){}
+  }
+});
+</script>
+</body>
+</html>
