@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ATOM KUMPİR & BURGER & WAFFLE</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden}
+
+/* ── CLOSED OVERLAY ── */
+.closed-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(10,10,10,0.96);backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px 32px;
+  animation:fadeIn .5s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.closed-overlay.hidden{display:none}
+.closed-sign{
+  width:90px;height:90px;border-radius:22px;
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:42px;margin-bottom:24px;
+}
+.closed-overlay h2{font-size:26px;font-weight:900;letter-spacing:-.5px;margin-bottom:10px}
+.closed-overlay p{font-size:15px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:20px}
+.hours-badge{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:12px 20px;
+  font-size:13px;color:rgba(255,255,255,.65);
+  display:flex;align-items:center;gap:8px;margin-bottom:28px;
+}
+.hours-badge .hb-icon{font-size:16px}
+.hours-badge b{color:#fff}
+.countdown-box{
+  background:rgba(232,57,14,.1);border:1px solid rgba(232,57,14,.25);
+  border-radius:14px;padding:16px 24px;margin-bottom:28px;
+  font-size:13px;color:rgba(255,255,255,.7);
+}
+.countdown-box .ct-time{
+  font-size:36px;font-weight:900;color:#FF6B3D;
+  font-variant-numeric:tabular-nums;letter-spacing:-.5px;
+  display:block;margin:4px 0;
+}
+.menu-preview-btn{
+  background:#E8390E;color:#fff;border:none;border-radius:14px;
+  padding:14px 32px;font-size:15px;font-weight:800;cursor:pointer;
+  font-family:'Figtree';margin-bottom:12px;
+  box-shadow:0 6px 24px rgba(232,57,14,.4);
+}
+.browse-link{
+  font-size:13px;color:rgba(255,255,255,.4);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;
+}
+.browse-link:hover{color:rgba(255,255,255,.7)}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(17,17,17,0.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  padding:0 18px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-logo{
+  width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  background:#E8390E;display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;
+}
+.tb-logo img{width:100%;height:100%;object-fit:cover}
+.tb-name{font-size:13px;font-weight:800;line-height:1.2;letter-spacing:-.2px}
+.tb-sub{font-size:10px;color:rgba(255,255,255,.4);font-weight:500}
+.table-pill{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.09);border-radius:20px;
+  padding:6px 12px;font-size:12px;font-weight:600;
+}
+.tdot{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.wallet-pill{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);
+  border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;
+}
+.wallet-pill span{color:#FACC15}
+
+/* ── HERO ── */
+.hero{position:relative;height:220px;overflow:hidden;cursor:pointer}
+.hero img{width:100%;height:100%;object-fit:cover;display:block;transition:.4s}
+.hero:hover img{transform:scale(1.03)}
+.hero-grad{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(17,17,17,0) 25%,rgba(17,17,17,1) 100%);
+}
+.hero-content{position:absolute;bottom:18px;left:18px;right:18px}
+.hero-tag{
+  display:inline-block;background:#E8390E;
+  color:#fff;font-size:10px;font-weight:700;
+  padding:4px 9px;border-radius:5px;letter-spacing:.5px;margin-bottom:8px;
+}
+.hero-h1{font-size:26px;font-weight:900;line-height:1.1;letter-spacing:-.5px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px}
+
+/* ── PROMO ── */
+.promo-row{
+  display:flex;gap:8px;padding:12px 18px 6px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.promo-row::-webkit-scrollbar{display:none}
+.pc{
+  flex-shrink:0;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.09);border-radius:10px;
+  padding:7px 12px;font-size:12px;font-weight:600;white-space:nowrap;
+}
+.pc b{color:#FACC15}
+
+/* ── CATS ── */
+.cats-wrap{
+  position:sticky;top:58px;z-index:40;
+  background:rgba(17,17,17,.97);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.cats-scroll{display:flex;overflow-x:auto;scrollbar-width:none}
+.cats-scroll::-webkit-scrollbar{display:none}
+.cat-btn{
+  flex-shrink:0;padding:13px 18px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.38);
+  border:none;background:transparent;cursor:pointer;
+  border-bottom:2px solid transparent;transition:.2s;
+  white-space:nowrap;font-family:'Figtree';
+}
+.cat-btn:hover{color:rgba(255,255,255,.75)}
+.cat-btn.active{color:#fff;border-bottom-color:#E8390E}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{
+  padding:18px 18px 8px;
+  font-size:10px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(255,255,255,.28);
+}
+
+/* ── FEATURED ── */
+.featured-card{
+  margin:0 18px;border-radius:20px;overflow:hidden;
+  position:relative;height:170px;cursor:pointer;
+}
+.featured-card img{width:100%;height:100%;object-fit:cover;display:block;transition:.4s}
+.featured-card:active img{transform:scale(1.04)}
+.fc-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(95deg,rgba(232,57,14,.83) 0%,transparent 62%);
+  display:flex;flex-direction:column;justify-content:flex-end;padding:18px;
+}
+.fc-tag{font-size:10px;font-weight:700;background:rgba(255,255,255,.18);border-radius:5px;padding:3px 8px;display:inline-block;margin-bottom:7px}
+.fc-name{font-size:21px;font-weight:900;letter-spacing:-.3px;line-height:1}
+.fc-price{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);margin-top:3px}
+.fc-btn{
+  position:absolute;right:14px;bottom:14px;
+  background:#fff;color:#E8390E;border:none;border-radius:11px;
+  padding:9px 16px;font-size:13px;font-weight:800;
+  cursor:pointer;font-family:'Figtree';
+}
+.fc-btn:active{background:#ffe5e0}
+
+/* ── PRODUCT LIST ── */
+.product-list{display:flex;flex-direction:column;padding-bottom:110px}
+.prod-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.05);transition:.12s;
+}
+.prod-row:active{background:#1c1c1c}
+.prod-row.unavail{opacity:.32;pointer-events:none;position:relative}
+.prod-img{width:80px;height:80px;border-radius:14px;object-fit:cover;flex-shrink:0}
+.prod-info{flex:1;min-width:0}
+.prod-name{font-size:15px;font-weight:700;margin-bottom:2px;letter-spacing:-.2px}
+.prod-desc{font-size:12px;color:rgba(255,255,255,.4);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-price{font-size:16px;font-weight:800}
+.pbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px}
+.pb-pop{background:rgba(232,57,14,.18);color:#FF6B3D}
+.pb-new{background:rgba(250,204,21,.14);color:#FACC15}
+.pb-out{background:rgba(100,100,100,.2);color:#888;font-size:10px}
+
+.add-btn{width:34px;height:34px;border-radius:50%;background:#E8390E;border:none;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.12s}
+.add-btn:active{background:#c73209;transform:scale(.9)}
+.qty-ctrl{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.qty-ctrl button{width:32px;height:32px;border-radius:50%;border:none;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s}
+.q-m{background:rgba(255,255,255,.1);color:#fff}
+.q-m:active{background:rgba(255,255,255,.2)}
+.q-p{background:#E8390E;color:#fff}
+.q-p:active{background:#c73209}
+.q-n{font-size:16px;font-weight:800;min-width:18px;text-align:center}
+
+/* ── DETAIL ── */
+.detail-ovl{
+  position:fixed;inset:0;z-index:200;background:#111;
+  transform:translateY(100%);transition:.32s cubic-bezier(.32,0,.15,1);
+  display:flex;flex-direction:column;max-width:430px;margin:0 auto;
+}
+.detail-ovl.open{transform:translateY(0)}
+.d-hero{position:relative;height:260px;flex-shrink:0}
+.d-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.d-hero-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,17,0) 40%,#111 100%)}
+.d-back{position:absolute;top:16px;left:16px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.d-body{flex:1;overflow-y:auto;padding:18px 18px 0}
+.d-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.d-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.55)}
+.d-body h2{font-size:26px;font-weight:900;letter-spacing:-.5px;margin-bottom:6px}
+.d-body p{font-size:14px;color:rgba(255,255,255,.45);line-height:1.65;margin-bottom:14px}
+.d-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.d-tag{font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5)}
+.d-price{font-size:30px;font-weight:900;margin-bottom:4px}
+.d-footer{padding:14px 18px 28px;flex-shrink:0;display:flex;align-items:center;gap:12px}
+.d-qty{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.08);border-radius:14px;padding:10px 16px}
+.d-qty button{width:30px;height:30px;border-radius:50%;border:none;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dm{background:rgba(255,255,255,.12);color:#fff}
+.dp{background:#E8390E;color:#fff}
+.d-qty span{font-size:18px;font-weight:800}
+.d-add{flex:1;padding:15px;border:none;border-radius:14px;background:#E8390E;color:#fff;font-family:'Figtree';font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.d-add:active{background:#c73209}
+
+/* ── CART BAR ── */
+.cart-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 18px 22px;background:linear-gradient(transparent,rgba(17,17,17,1) 28%);z-index:100;display:none}
+.cart-bar.visible{display:block}
+.cbb{width:100%;padding:16px 20px;border:none;border-radius:18px;background:#E8390E;color:#fff;display:flex;align-items:center;justify-content:space-between;font-family:'Figtree';font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 32px rgba(232,57,14,.4)}
+.cbb:active{background:#c73209}
+.c-badge{background:rgba(0,0,0,.25);border-radius:8px;padding:3px 10px;font-size:14px;font-weight:800}
+
+/* ── SHEET ── */
+.sheet-ovl{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.72);display:none;align-items:flex-end}
+.sheet-ovl.open{display:flex}
+.sheet{background:#1C1C1C;border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:90vh;display:flex;flex-direction:column;animation:sup .3s cubic-bezier(.32,0,.15,1)}
+@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sh-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);margin:12px auto 0}
+.sh-head{padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.sh-head h3{font-size:20px;font-weight:800}
+.sh-close{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.1);color:#fff;font-size:15px;cursor:pointer}
+.sh-body{flex:1;overflow-y:auto;padding:0 20px 24px}
+
+.ci-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.ci-row img{width:52px;height:52px;border-radius:11px;object-fit:cover;flex-shrink:0}
+.ci-info{flex:1}.ci-info h4{font-size:14px;font-weight:700;margin-bottom:2px}.ci-info span{font-size:12px;color:rgba(255,255,255,.38)}
+.ci-price{font-size:15px;font-weight:800;margin-right:8px}
+.ci-del{width:28px;height:28px;border-radius:8px;border:none;background:rgba(255,255,255,.07);color:rgba(255,255,255,.45);cursor:pointer;font-size:13px}
+
+.loyalty-box{margin:14px 0;padding:14px;background:rgba(250,204,21,.07);border:1px solid rgba(250,204,21,.14);border-radius:16px;display:flex;align-items:center;gap:12px}
+.pts-orb{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#FACC15,#F59E0B);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.pts-orb .pv{font-size:15px;font-weight:900;color:#fff;line-height:1}
+.pts-orb .pl{font-size:8px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.5px}
+.loyalty-txt{font-size:12px;color:rgba(255,255,255,.55);line-height:1.55}
+.loyalty-txt strong{color:#FACC15}
+
+.disc-box{margin-bottom:14px;padding:12px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.14);border-radius:13px;font-size:13px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:8px}
+.disc-box strong{color:#4ADE80}
+
+.sum-wrap{margin-bottom:14px}
+.sl{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;color:rgba(255,255,255,.45)}
+.sl.disc{color:#4ADE80;font-weight:600}
+.sl.total{padding-top:12px;border-top:1px solid rgba(255,255,255,.07);color:#fff;font-size:17px;font-weight:800}
+.sl.total .tv{font-size:20px;color:#E8390E}
+
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pay-opt{border:1.5px solid rgba(255,255,255,.09);border-radius:14px;padding:12px;text-align:center;cursor:pointer;background:transparent;transition:.2s;font-family:'Figtree'}
+.pay-opt:hover,.pay-opt.sel{border-color:#E8390E;background:rgba(232,57,14,.08)}
+.pay-opt .pi{font-size:22px;display:block;margin-bottom:4px}
+.pay-opt .pt{font-size:11px;font-weight:600;color:rgba(255,255,255,.55)}
+.pay-note{font-size:11px;text-align:center;color:rgba(255,255,255,.3);margin-bottom:14px}
+.pay-note span{color:#4ADE80}
+.order-cta{width:100%;padding:17px;border:none;border-radius:16px;background:#E8390E;color:#fff;font-family:'Figtree';font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 6px 24px rgba(232,57,14,.35)}
+.order-cta:active{background:#c73209}
+
+/* NFC */
+.nfc-ovl{position:fixed;inset:0;z-index:300;background:rgba(17,17,17,.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:36px}
+.nfc-ovl.show{display:flex}
+.nfc-ring{width:116px;height:116px;border-radius:50%;border:2px solid rgba(232,57,14,.45);display:flex;align-items:center;justify-content:center;font-size:50px;animation:nfcp 2s ease-in-out infinite}
+@keyframes nfcp{0%,100%{box-shadow:0 0 0 0 rgba(232,57,14,.3)}50%{box-shadow:0 0 0 22px rgba(232,57,14,0)}}
+.nfc-badge{background:#E8390E;color:#fff;border-radius:10px;padding:8px 20px;font-size:14px;font-weight:700}
+.nfc-ovl h2{font-size:27px;font-weight:900;letter-spacing:-.5px}
+.nfc-ovl p{font-size:14px;color:rgba(255,255,255,.48);line-height:1.65;max-width:280px}
+.nfc-pts{color:#FACC15;font-weight:700}
+.nfc-go{background:#E8390E;color:#fff;border:none;border-radius:14px;padding:15px 36px;font-size:16px;font-weight:800;cursor:pointer;font-family:'Figtree';box-shadow:0 6px 24px rgba(232,57,14,.4);margin-top:4px}
+
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(8px);background:#2A2A2A;border:1px solid rgba(255,255,255,.07);color:#fff;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:500;z-index:400;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ══ CLOSED OVERLAY ══ -->
+<div class="closed-overlay hidden" id="closedOverlay">
+  <div class="closed-sign">🔒</div>
+  <h2>Şu Anda Kapalıyız</h2>
+  <p>ATOM KUMPİR &amp; BURGER &amp; WAFFLE<br>şu an hizmet vermiyor.</p>
+  <div class="hours-badge">
+    <span class="hb-icon">🕐</span>
+    <span>Bugün <b id="openTime">11:30</b> – <b id="closeTime">23:45</b> açığız</span>
+  </div>
+  <div class="countdown-box">
+    <span style="color:rgba(255,255,255,.6);font-size:13px">Açılmaya kalan süre</span>
+    <span class="ct-time" id="countdownTimer">--:--:--</span>
+    <span style="color:rgba(255,255,255,.45);font-size:12px">saat · dakika · saniye</span>
+  </div>
+  <button class="menu-preview-btn" onclick="dismissClosed()">Menüyü Önizle →</button>
+  <span class="browse-link" onclick="dismissClosed()">Sipariş vermeden göz at</span>
+</div>
+
+<!-- ══ NFC WELCOME ══ -->
+<div class="nfc-ovl" id="nfcOvl">
+  <div class="nfc-ring">📱</div>
+  <h2>Hoş Geldiniz!</h2>
+  <div class="nfc-badge">📍 Masa 7 &nbsp;·&nbsp; 🔋 Şarj oluyor</div>
+  <p>ATOM KUMPİR &amp; BURGER &amp; WAFFLE<br><span class="nfc-pts">340 puanınız var — 500'de 50₺ hediye!</span></p>
+  <button class="nfc-go" onclick="document.getElementById('nfcOvl').classList.remove('show')">Menüyü Gör →</button>
+</div>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="tb-left">
+    <div class="tb-logo">A</div>
+    <div>
+      <div class="tb-name">ATOM KUMPİR</div>
+      <div class="tb-sub">& BURGER & WAFFLE</div>
+    </div>
+  </div>
+  <div class="table-pill"><div class="tdot"></div> Masa 7</div>
+  <div class="wallet-pill">⭐ <span>340</span></div>
+</header>
+
+<!-- ══ HERO ══ -->
+<div class="hero" id="heroSection">
+  <img id="heroImg" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=85&auto=format&fit=crop" alt="">
+  <div class="hero-grad"></div>
+  <div class="hero-content">
+    <div class="hero-tag" id="heroTag">🔥 Günün Önerisi</div>
+    <div class="hero-h1" id="heroTitle">El Yapımı<br>Smash Burger</div>
+    <div class="hero-sub" id="heroSub">Taze · Sıcak · Lezzetli</div>
+  </div>
+</div>
+
+<!-- ══ PROMO ══ -->
+<div class="promo-row">
+  <div class="pc">🎁 2. Siparişte <b>%12 İndirim</b></div>
+  <div class="pc">💳 <b>Temassız POS</b></div>
+  <div class="pc">⭐ <b>500 puan</b> = 50₺</div>
+  <div class="pc" id="openStatus">🕐 <b id="statusText">Açık</b></div>
+</div>
+
+<!-- ══ CATS ══ -->
+<div class="cats-wrap">
+  <div class="cats-scroll">
+    <button class="cat-btn active" onclick="selCat('all',this)">Tümü</button>
+    <button class="cat-btn" onclick="selCat('kumpir',this)">Kumpir</button>
+    <button class="cat-btn" onclick="selCat('burger',this)">Burger</button>
+    <button class="cat-btn" onclick="selCat('waffle',this)">Waffle</button>
+    <button class="cat-btn" onclick="selCat('drink',this)">İçecek</button>
+  </div>
+</div>
+
+<div id="featuredSection">
+  <div class="sec-lbl">Öne Çıkan</div>
+  <div class="featured-card" onclick="openDetail(2)">
+    <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800&q=85&auto=format&fit=crop" alt="Double Smash">
+    <div class="fc-overlay">
+      <span class="fc-tag">⭐ EN ÇOK SATAN</span>
+      <div class="fc-name">Double Smash Burger</div>
+      <div class="fc-price">₺239</div>
+    </div>
+    <button class="fc-btn" onclick="event.stopPropagation();addItem(2)">+ Ekle</button>
+  </div>
+</div>
+
+<div class="sec-lbl">Menü</div>
+<div class="product-list" id="productList"></div>
+
+<div class="cart-bar" id="cartBar">
+  <button class="cbb" onclick="openSheet()">
+    <span style="display:flex;align-items:center;gap:10px">
+      <span class="c-badge" id="cBadge">0</span> Sepeti Görüntüle
+    </span>
+    <span id="cTotal">₺0</span>
+  </button>
+</div>
+
+<div class="sheet-ovl" id="sheetOvl" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-head"><h3>Sepetim</h3><button class="sh-close" onclick="closeSheet()">✕</button></div>
+    <div class="sh-body" id="shBody"></div>
+  </div>
+</div>
+
+<div class="detail-ovl" id="detailOvl">
+  <div class="d-hero">
+    <img id="dImg" src="" alt="">
+    <div class="d-hero-grad"></div>
+    <button class="d-back" onclick="closeDetail()">←</button>
+  </div>
+  <div class="d-body">
+    <div class="d-badges" id="dBadges"></div>
+    <h2 id="dName"></h2>
+    <p id="dDesc"></p>
+    <div class="d-tags" id="dTags"></div>
+    <div class="d-price" id="dPrice"></div>
+  </div>
+  <div class="d-footer">
+    <div class="d-qty">
+      <button class="dm" id="dmBtn">−</button>
+      <span id="dQty">1</span>
+      <button class="dp" id="dpBtn">+</button>
+    </div>
+    <button class="d-add" id="dAddBtn">
+      <span>Sepete Ekle</span><span id="dAddPrice">₺0</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ── BUSINESS HOURS ──
+const OPEN_H=11, OPEN_M=30, CLOSE_H=23, CLOSE_M=45;
+let isBusinessOpen=true;
+
+function checkBusinessHours(){
+  const now=new Date();
+  const h=now.getHours(), m=now.getMinutes();
+  const cur=h*60+m, open=OPEN_H*60+OPEN_M, close=CLOSE_H*60+CLOSE_M;
+  isBusinessOpen=(cur>=open && cur<close);
+  const overlay=document.getElementById('closedOverlay');
+  document.getElementById('openTime').textContent=`${OPEN_H}:${String(OPEN_M).padStart(2,'0')}`;
+  document.getElementById('closeTime').textContent=`${CLOSE_H}:${String(CLOSE_M).padStart(2,'0')}`;
+  if(!isBusinessOpen){
+    overlay.classList.remove('hidden');
+    updateCountdown();
+  } else {
+    overlay.classList.add('hidden');
+  }
+  document.getElementById('statusText').textContent=isBusinessOpen?'Açık 🟢':'Kapalı 🔴';
+}
+
+function updateCountdown(){
+  const now=new Date();
+  let targetH=OPEN_H, targetM=OPEN_M;
+  // if past close, next day open
+  const cur=(now.getHours()*60+now.getMinutes());
+  const open=OPEN_H*60+OPEN_M;
+  let diff;
+  if(cur>=CLOSE_H*60+CLOSE_M || cur<open){
+    // calc to next open
+    const nextOpen=new Date(now);
+    if(cur>=CLOSE_H*60+CLOSE_M) nextOpen.setDate(nextOpen.getDate()+1);
+    nextOpen.setHours(OPEN_H,OPEN_M,0,0);
+    diff=Math.floor((nextOpen-now)/1000);
+  } else diff=0;
+  if(diff<=0){document.getElementById('countdownTimer').textContent='00:00:00';return;}
+  const hh=Math.floor(diff/3600), mm=Math.floor((diff%3600)/60), ss=diff%60;
+  document.getElementById('countdownTimer').textContent=
+    `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+}
+
+function dismissClosed(){
+  document.getElementById('closedOverlay').classList.add('hidden');
+}
+
+// ── MENU DATA (shared with admin via localStorage simulation) ──
+const DEFAULT_ITEMS=[
+  {id:1,name:'Kumpir Klasik',cat:'kumpir',badge:'',img:'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&q=80&auto=format&fit=crop',desc:'Fırında pişmiş büyük patates, tereyağı, mısır, siyah zeytin ve mevsim salata.',tags:['🥔 Büyük Patates','🌽 Mısır','🫒 Zeytin'],price:149,available:true},
+  {id:2,name:'Kumpir Spesyal',cat:'kumpir',badge:'pop',img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80&auto=format&fit=crop',desc:'Ton balığı, konserve fasulye, mısır, özel sos ve taze sebzeler.',tags:['🐟 Ton Balığı','🫘 Fasulye','Özel Sos'],price:179,available:true},
+  {id:3,name:'Smash Burger',cat:'burger',badge:'pop',img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80&auto=format&fit=crop',desc:'200g dana eti, cheddar peyniri, özel sos, taze domates ve turşu.',tags:['🥩 Dana','🧀 Cheddar','🍞 Brioche'],price:189,available:true},
+  {id:4,name:'Double Smash',cat:'burger',badge:'pop',img:'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=600&q=80&auto=format&fit=crop',desc:'400g çift katlı dana pati, double cheddar, jalapeño ve BBQ sos.',tags:['🥩 400g','🌶 Jalapeño','🔥 BBQ'],price:239,available:true},
+  {id:5,name:'Crispy Chicken',cat:'burger',badge:'new',img:'https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=600&q=80&auto=format&fit=crop',desc:'Çıtır tavuk göğsü, ranch sos ve coleslaw.',tags:['🍗 Tavuk','Ranch','Çıtır'],price:175,available:true},
+  {id:6,name:'Waffle Tatlı',cat:'waffle',badge:'new',img:'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=600&q=80&auto=format&fit=crop',desc:'Belçika waffle, Nutella, taze çilek ve dondurma.',tags:['🍫 Nutella','🍓 Çilek','🍦'],price:139,available:true},
+  {id:7,name:'Waffle Karışık',cat:'waffle',badge:'',img:'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=600&q=80&auto=format&fit=crop',desc:'Muz, karamel sos, fındık krokan ve vanilyalı dondurma.',tags:['🍌 Muz','Karamel','Fındık'],price:159,available:true},
+  {id:8,name:'Limonata',cat:'drink',badge:'',img:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=600&q=80&auto=format&fit=crop',desc:'Taze sıkılmış limon, nane ve buz.',tags:['🍋 Taze','🌿 Nane','Soğuk'],price:65,available:true},
+  {id:9,name:'Milkshake',cat:'drink',badge:'new',img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&q=80&auto=format&fit=crop',desc:'Çikolata veya vanilyalı milkshake, üstünde krema.',tags:['🥛','🍫 Çikolata','Krema'],price:95,available:true},
+];
+
+// Sync from admin (simulated shared state)
+function getItems(){
+  try{const s=sessionStorage.getItem('atom_menu');if(s)return JSON.parse(s)}catch(e){}
+  return DEFAULT_ITEMS;
+}
+let ITEMS=getItems();
+
+let cart={},curCat='all',detItem=null,detQty=1;
+
+function renderMenu(){
+  const list=document.getElementById('productList');
+  const f=curCat==='all'?ITEMS:ITEMS.filter(i=>i.cat===curCat);
+  document.getElementById('featuredSection').style.display=curCat==='all'?'block':'none';
+  list.innerHTML=f.map(item=>{
+    const q=cart[item.id]||0;
+    const b=item.badge==='pop'?`<span class="pbadge pb-pop">🔥 Popüler</span>`:item.badge==='new'?`<span class="pbadge pb-new">Yeni</span>`:'';
+    const unavailLabel=!item.available?`<span class="pbadge pb-out">Tükendi</span>`:'';
+    const ctrl=!item.available?''
+      :q===0?`<button class="add-btn" onclick="event.stopPropagation();addItem(${item.id})">+</button>`
+      :`<div class="qty-ctrl"><button class="q-m" onclick="event.stopPropagation();remItem(${item.id})">−</button><span class="q-n">${q}</span><button class="q-p" onclick="event.stopPropagation();addItem(${item.id})">+</button></div>`;
+    return `<div class="prod-row${!item.available?' unavail':''}" onclick="${item.available?`openDetail(${item.id})`:''}" >
+      <img class="prod-img" src="${item.img}" alt="${item.name}" loading="lazy" style="${!item.available?'filter:grayscale(70%)':''}" >
+      <div class="prod-info">
+        <div class="prod-name">${item.name} ${b} ${unavailLabel}</div>
+        <div class="prod-desc">${item.desc}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span class="prod-price">₺${item.price}</span>
+        </div>
+      </div>
+      ${ctrl}
+    </div>`;
+  }).join('');
+}
+
+function selCat(cat,el){curCat=cat;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderMenu()}
+function addItem(id){cart[id]=(cart[id]||0)+1;updUI();renderMenu()}
+function remItem(id){if(cart[id]){cart[id]--;if(!cart[id])delete cart[id]}updUI();renderMenu()}
+function getSub(){return Object.entries(cart).reduce((a,[id,q])=>a+ITEMS.find(i=>i.id==id).price*q,0)}
+function getDisc(){const s=getSub();return Object.keys(cart).length?Math.round(s*.12):0}
+function getTotal(){return getSub()-getDisc()}
+function updUI(){
+  const c=Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById('cBadge').textContent=c;
+  document.getElementById('cTotal').textContent='₺'+getTotal();
+  document.getElementById('cartBar').className='cart-bar'+(c>0?' visible':'');
+}
+
+function openDetail(id){
+  detItem=ITEMS.find(i=>i.id===id);detQty=1;
+  document.getElementById('dImg').src=detItem.img;
+  document.getElementById('dName').textContent=detItem.name;
+  document.getElementById('dDesc').textContent=detItem.desc;
+  document.getElementById('dPrice').textContent='₺'+detItem.price;
+  document.getElementById('dBadges').innerHTML=detItem.badge==='pop'?`<span class="d-badge" style="background:rgba(232,57,14,.15);color:#FF6B3D">🔥 Popüler</span>`:detItem.badge==='new'?`<span class="d-badge" style="background:rgba(250,204,21,.12);color:#FACC15">✨ Yeni</span>`:'';
+  document.getElementById('dTags').innerHTML=detItem.tags.map(t=>`<span class="d-tag">${t}</span>`).join('');
+  updDetail();
+  document.getElementById('detailOvl').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('dmBtn').onclick=()=>{if(detQty>1)detQty--;updDetail()};
+  document.getElementById('dpBtn').onclick=()=>{detQty++;updDetail()};
+  document.getElementById('dAddBtn').onclick=()=>{cart[detItem.id]=(cart[detItem.id]||0)+detQty;updUI();closeDetail();renderMenu();showToast('✓ Sepete eklendi')};
+}
+function updDetail(){document.getElementById('dQty').textContent=detQty;document.getElementById('dAddPrice').textContent='₺'+(detItem.price*detQty)}
+function closeDetail(){document.getElementById('detailOvl').classList.remove('open');document.body.style.overflow=''}
+
+function openSheet(){renderSheet();document.getElementById('sheetOvl').classList.add('open');document.body.style.overflow='hidden'}
+function closeSheet(){document.getElementById('sheetOvl').classList.remove('open');document.body.style.overflow=''}
+function renderSheet(){
+  const b=document.getElementById('shBody'),e=Object.entries(cart);
+  if(!e.length){b.innerHTML='<p style="color:rgba(255,255,255,.35);text-align:center;padding:40px 0">Sepet boş</p>';return}
+  const sub=getSub(),disc=getDisc(),tot=getTotal(),earn=Math.round(tot*.08);
+  b.innerHTML=e.map(([id,q])=>{const it=ITEMS.find(i=>i.id==id);return`<div class="ci-row"><img src="${it.img}" alt="${it.name}"><div class="ci-info"><h4>${it.name}</h4><span>${q} adet</span></div><span class="ci-price">₺${it.price*q}</span><button class="ci-del" onclick="remItem(${id});renderSheet()">✕</button></div>`}).join('')
+  +`<div class="loyalty-box"><div class="pts-orb"><span class="pv">+${earn}</span><span class="pl">PUAN</span></div><div class="loyalty-txt">Bu siparişten <strong>${earn} puan</strong> kazanıyorsunuz.<br>Toplam: <strong>340 → ${340+earn}</strong> — Hedefe ${Math.max(0,500-340-earn)} kaldı!</div></div>`
+  +(disc?`<div class="disc-box">🎁 <span><strong>%12 İndirim</strong> (2. alışveriş) uygulandı</span></div>`:'')
+  +`<div class="sum-wrap"><div class="sl"><span>Ara Toplam</span><span>₺${sub}</span></div>${disc?`<div class="sl disc"><span>İndirim</span><span>−₺${disc}</span></div>`:''}<div class="sl"><span>Servis</span><span style="color:#4ADE80">Ücretsiz</span></div><div class="sl total"><span>Toplam</span><span class="tv">₺${tot}</span></div></div>`
+  +`<div class="pay-grid"><button class="pay-opt sel" onclick="sp(this)"><span class="pi">💳</span><span class="pt">Kredi Kartı</span></button><button class="pay-opt" onclick="sp(this)"><span class="pi">🍽️</span><span class="pt">Yemek Kartı</span></button><button class="pay-opt" onclick="sp(this)"><span class="pi">💵</span><span class="pt">Nakit</span></button><button class="pay-opt" onclick="sp(this)"><span class="pi">⭐</span><span class="pt">Puanla</span></button></div>`
+  +`<p class="pay-note">Kapıda ödeme için mobil POS gelecektir · <span>Temassız NFC</span></p><button class="order-cta" onclick="placeOrder()">🔥 Siparişi Onayla</button>`;
+}
+function sp(btn){document.querySelectorAll('.pay-opt').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel')}
+function placeOrder(){cart={};updUI();renderMenu();closeSheet();showToast('✅ Siparişiniz mutfağa iletildi!')}
+function showToast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
+
+// ── INIT ──
+checkBusinessHours();
+setInterval(()=>{if(!isBusinessOpen)updateCountdown()},1000);
+setInterval(checkBusinessHours,60000);
+
+// Reload menu data periodically (simulates sync with admin panel)
+setInterval(()=>{ITEMS=getItems();renderMenu()},5000);
+
+renderMenu();
+// Show NFC after closed check (only if open)
+setTimeout(()=>{if(isBusinessOpen)document.getElementById('nfcOvl').classList.add('show')},600);
+</script>
+</body>
+</html>
