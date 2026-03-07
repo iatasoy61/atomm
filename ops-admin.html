@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<script>
-(function(){
-  var role = sessionStorage.getItem('atom_role');
-  if(!role || ['admin','super'].indexOf(role) === -1) {
-    window.location.replace('ops-login.html');
-  }
-})();
-</script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ATOM OPS · Admin</title>
@@ -883,11 +874,31 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 
 <div class="toast" id="toast"></div>
 <script>
+// ── AUTH GUARD ──
+(function(){
+  var role = sessionStorage.getItem('atom_role');
+  var allowed = ["admin", "super"];
+  if(!role || allowed.indexOf(role) === -1) {
+    window.location.replace('ops-login.html');
+    throw new Error('redirect');
+  }
+})();
+
+// ── LOGOUT ──
+function atomLogout(){
+  sessionStorage.removeItem('atom_role');
+  sessionStorage.removeItem('atom_user');
+  sessionStorage.removeItem('atom_label');
+  window.location.href = 'ops-login.html';
+  window.location.href = 'ops-login.html';
+}
+
+
 // ── AUTH ──
 const ACCOUNTS=[
-  {user:'admin',pass:'atom2024',name:'Admin',sub:'atom2024'},
-  {user:'patron',pass:'patron2024',name:'Patron',sub:'patron2024'},
-  {user:'isletme',pass:'isletme24',name:'İşletme Müdürü',sub:'isletme24'},
+  {user:'admin',pass:'2112',name:'Admin',sub:'2112'},
+  {user:'patron',pass:'2112',name:'Patron',sub:'2112'},
+  {user:'isletme',pass:'2112',name:'İşletme Müdürü',sub:'2112'},
 ];
 function doLogin(){
   var u=document.getElementById('loginUser').value.trim();

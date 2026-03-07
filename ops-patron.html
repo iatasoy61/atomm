@@ -185,37 +185,8 @@ body::before{content:'';position:fixed;width:800px;height:400px;border-radius:50
 .pl-pos{color:var(--green);font-family:var(--mono)}.pl-neg{color:var(--red);font-family:var(--mono)}.pl-neutral{font-family:var(--mono)}
 </style>
 
-<style id="loginStyles">
-#panelLoginOverlay{position:fixed;inset:0;z-index:9999;background:#07080A;display:flex;align-items:center;justify-content:center;font-family:"Figtree",system-ui,sans-serif}
-.plb{background:#0F1114;border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:40px;width:100%;max-width:380px;box-shadow:0 40px 80px rgba(0,0,0,.6)}
-.plb-logo{width:52px;height:52px;background:#E8390E;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
-.plb-title{text-align:center;font-size:20px;font-weight:900;color:#E8EAF0;margin-bottom:4px}
-.plb-sub{text-align:center;font-size:12px;color:#4A5060;margin-bottom:28px}
-.plb-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4A5060;margin-bottom:6px;display:block}
-.plb-inp{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:13px 16px;color:#E8EAF0;font-family:inherit;font-size:13px;outline:none;margin-bottom:12px;box-sizing:border-box}
-.plb-inp:focus{border-color:rgba(232,57,14,.4);background:rgba(232,57,14,.04)}
-.plb-btn{width:100%;padding:14px;border:none;border-radius:11px;background:#E8390E;color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px}
-.plb-btn:hover{background:#ff4d1a}
-.plb-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:9px;padding:10px 14px;font-size:12px;color:#FCA5A5;margin-top:10px;display:none;text-align:center}
-.plb-hint{text-align:center;font-size:11px;color:#4A5060;margin-top:14px}
-.plb-hint span{color:#E8390E;font-weight:700}
-</style>
 </head>
 <body>
-<div id="panelLoginOverlay">
-  <div class="plb">
-    <div class="plb-logo">👑</div>
-    <div class="plb-title">ATOM OPS</div>
-    <div class="plb-sub">Patron Ekranı · ops.atomkumpir.com</div>
-    <label class="plb-lbl">Kullanıcı Adı</label>
-    <input class="plb-inp" id="pLoginUser" placeholder="patron" onkeydown="if(event.key==='Enter')pDoLogin()">
-    <label class="plb-lbl">Şifre</label>
-    <input class="plb-inp" id="pLoginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')pDoLogin()">
-    <button class="plb-btn" onclick="pDoLogin()">🔐 Giriş Yap</button>
-    <div class="plb-err" id="pLoginErr">Hatalı kullanıcı adı veya şifre</div>
-    <div class="plb-hint">Giriş: <span>patron / patron2024</span></div>
-  </div>
-</div>
 <div class="shell">
 
 <!-- SIDEBAR -->
@@ -468,6 +439,26 @@ body::before{content:'';position:fixed;width:800px;height:400px;border-radius:50
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
 </script><script>
+// ── AUTH GUARD ──
+(function(){
+  var role = sessionStorage.getItem('atom_role');
+  var allowed = ["admin", "patron"];
+  if(!role || allowed.indexOf(role) === -1) {
+    window.location.replace('ops-login.html');
+    throw new Error('redirect');
+  }
+})();
+
+// ── LOGOUT ──
+function atomLogout(){
+  sessionStorage.removeItem('atom_role');
+  sessionStorage.removeItem('atom_user');
+  sessionStorage.removeItem('atom_label');
+  window.location.href = 'ops-login.html';
+  window.location.href = 'ops-login.html';
+}
+
+
 // ── DATA ──
 const PERIODS = {
   gunluk:  {ciro:'₺18.4K',kar:'₺4.4K',siparis:247,doluluk:'68%',marj:'%24'},
@@ -862,28 +853,6 @@ setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleT
 renderKPI();renderHourly();renderDonut();renderOccupancy();
 renderTopProducts();renderLiveStatus();renderPL();renderCiro();
 renderOverhead();renderHeatmap();renderInsights();renderFRHistory();
-
-
-var P_CREDS = [{u:'patron',p:'patron2024',n:'Patron'},{u:'admin',p:'atom2024',n:'Admin'}];
-function pDoLogin(){
-  var u = document.getElementById('pLoginUser').value.trim();
-  var p = document.getElementById('pLoginPass').value;
-  var found = null;
-  for(var i=0;i<P_CREDS.length;i++){if(P_CREDS[i].u===u&&P_CREDS[i].p===p){found=P_CREDS[i];break;}}
-  if(!found){
-    var e=document.getElementById('pLoginErr');
-    e.style.display='block';
-    document.getElementById('pLoginPass').value='';
-    setTimeout(function(){e.style.display='none';},3000);
-    return;
-  }
-  document.getElementById('panelLoginOverlay').style.display='none';
-}
-function atomLogout(){
-  document.getElementById('pLoginUser').value='';
-  document.getElementById('pLoginPass').value='';
-  document.getElementById('panelLoginOverlay').style.display='flex';
-}
 </script>
 </body>
 </html>
