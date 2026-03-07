@@ -249,28 +249,14 @@ function checkAutoLogin() {
   var u = document.getElementById('username').value.trim();
   var p = document.getElementById('password').value;
   if (!u || !p) return;
-  
-  // Find matching user across all roles
   for (var role in USERS) {
     var cred = USERS[role];
     if (cred.user === u && cred.pass === p) {
-      // Auto select role button
-      document.querySelectorAll('.role-btn').forEach(function(b) {
-        b.classList.remove('active');
-        if (b.dataset.role === role) b.classList.add('active');
-      });
-      selectedRole = role;
-      
-      // Auto login after short delay
-      setTimeout(function() {
-        sessionStorage.setItem('atom_role', selectedRole);
-        sessionStorage.setItem('atom_user', u);
-        sessionStorage.setItem('atom_label', cred.label);
-        document.getElementById('loadingRole').textContent = cred.label + ' yükleniyor...';
-        document.getElementById('loadingOvl').classList.add('show');
-        setTimeout(function() { window.location.href = cred.url; }, 800);
-      }, 300);
-      break;
+      sessionStorage.setItem('atom_role', role);
+      sessionStorage.setItem('atom_user', u);
+      sessionStorage.setItem('atom_label', cred.label);
+      window.location.href = cred.url;
+      return;
     }
   }
 }
