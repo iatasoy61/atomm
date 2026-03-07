@@ -922,17 +922,11 @@ function doLogin(){
 }
 function doLogout(){openModal('logoutModal');}
 function confirmLogout(){
-  var sh=document.getElementById('appShell');
-  sh.style.opacity='0';sh.style.transition='opacity .3s';
-  setTimeout(function(){
-    sh.style.display='none';
-    var ov=document.getElementById('loginOverlay');
-    ov.style.display='flex';ov.style.opacity='0';
-    setTimeout(function(){ov.style.opacity='1';ov.style.transition='opacity .3s'},10);
-    document.getElementById('loginUser').value='';
-    document.getElementById('loginPass').value='';
-    closeModal('logoutModal');
-  },300);
+  sessionStorage.removeItem('atom_role');
+  sessionStorage.removeItem('atom_user');
+  sessionStorage.removeItem('atom_label');
+  closeModal('logoutModal');
+  window.location.href = 'ops-login.html';
 }
 
 // ── DATA ──
