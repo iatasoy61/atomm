@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>ATOM KUMPİR & BURGER & WAFFLE</title>
+<title>ATOM MENU</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -81,12 +81,17 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
 }
 .tdot{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.wallet-pill{
+.wallet-pill{display:none}
+.member-btn{
   display:flex;align-items:center;gap:5px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);
-  border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;
+  background:linear-gradient(135deg,#92400e,#FACC15);
+  border:none;border-radius:20px;padding:7px 13px;
+  font-size:12px;font-weight:800;color:#000;
+  cursor:pointer;font-family:'Figtree';
+  box-shadow:0 0 12px rgba(250,204,21,.3);
+  transition:.2s;
 }
-.wallet-pill span{color:#FACC15}
+.member-btn:active{transform:scale(.96)}
 
 
 /* ── QUICK ACTION BUTTONS ── */
@@ -94,6 +99,7 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
 .pc-vale{background:#0d0d1f;color:#818CF8;border-color:rgba(129,140,248,.25)!important}
 .pc-takip{background:#0d1a1f;color:#38BDF8;border-color:rgba(56,189,248,.25)!important}
 .pc-ode{background:#1f0d0d;color:#FB923C;border-color:rgba(251,146,60,.25)!important}
+.pc-loyalty{background:#1a1400;color:#FACC15;border-color:rgba(250,204,21,.3)!important;font-size:13px!important}
 
 /* ── MODAL SHARED ── */
 .qa-modal{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.8);display:none;align-items:flex-end;justify-content:center;padding:0}
@@ -118,8 +124,12 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
 
 /* ── HERO ── */
 .hero{position:relative;height:220px;overflow:hidden;cursor:pointer}
-.hero img{width:100%;height:100%;object-fit:cover;display:block;transition:.4s}
-.hero:hover img{transform:scale(1.03)}
+.hero-track{display:flex;height:100%;transition:transform .5s cubic-bezier(.77,0,.18,1)}
+.hero-slide{min-width:100%;height:100%;flex-shrink:0}
+.hero-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-dots{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);transition:.3s}
+.hero-dot.active{width:18px;border-radius:3px;background:#fff}
 .hero-grad{
   position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(17,17,17,0) 25%,rgba(17,17,17,1) 100%);
@@ -325,7 +335,7 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
 <div class="closed-overlay hidden" id="closedOverlay">
   <div class="closed-sign">🔒</div>
   <h2>Şu Anda Kapalıyız</h2>
-  <p>ATOM KUMPİR &amp; BURGER &amp; WAFFLE<br>şu an hizmet vermiyor.</p>
+  <p>ATOM MENU<br>şu an hizmet vermiyor.</p>
   <div class="hours-badge">
     <span class="hb-icon">🕐</span>
     <span>Bugün <b id="openTime">11:30</b> – <b id="closeTime">23:45</b> açığız</span>
@@ -344,7 +354,7 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
   <div class="nfc-ring">📱</div>
   <h2>Hoş Geldiniz!</h2>
   <div class="nfc-badge">📍 Masa 7 &nbsp;·&nbsp; 🔋 Şarj oluyor</div>
-  <p>ATOM KUMPİR &amp; BURGER &amp; WAFFLE<br><span class="nfc-pts">340 puanınız var — 500'de 50₺ hediye!</span></p>
+  <p>ATOM MENU<br><span class="nfc-pts">340 puanınız var — 500'de 50₺ hediye!</span></p>
   <button class="nfc-go" onclick="document.getElementById('nfcOvl').classList.remove('show')">Menüyü Gör →</button>
 </div>
 
@@ -353,18 +363,23 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
   <div class="tb-left">
     <div class="tb-logo">A</div>
     <div>
-      <div class="tb-name">ATOM KUMPİR</div>
-      <div class="tb-sub">& BURGER & WAFFLE</div>
+      <div class="tb-name">ATOM MENU</div>
     </div>
   </div>
   <div class="table-pill"><div class="tdot"></div> Masa 7</div>
-  <div class="wallet-pill">⭐ <span>340</span></div>
+  <button class="member-btn" onclick="openMemberLogin()">⭐ Üye Girişi</button>
 </header>
 
 <!-- ══ HERO ══ -->
 <div class="hero" id="heroSection">
-  <img id="heroImg" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=85&auto=format&fit=crop" alt="">
+  <div class="hero-track" id="heroTrack">
+    <div class="hero-slide"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=85&auto=format&fit=crop" alt="Burger"></div>
+    <div class="hero-slide"><img src="https://images.unsplash.com/photo-1513442542250-854d436a73f2?w=900&q=85&auto=format&fit=crop" alt="Waffle"></div>
+    <div class="hero-slide"><img src="https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=900&q=85&auto=format&fit=crop" alt="Pizza"></div>
+    <div class="hero-slide"><img src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=900&q=85&auto=format&fit=crop" alt="Kumpir"></div>
+  </div>
   <div class="hero-grad"></div>
+  <div class="hero-dots" id="heroDots"></div>
   <div class="hero-content">
     <div class="hero-tag" id="heroTag">🔥 Günün Önerisi</div>
     <div class="hero-h1" id="heroTitle">El Yapımı<br>Smash Burger</div>
@@ -378,6 +393,7 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
   <button class="pc pc-vale" onclick="openQA('vale')">🚗 Vale Çağır</button>
   <button class="pc pc-takip" onclick="openQA('takip')">📦 Sipariş Takip</button>
   <button class="pc pc-ode" onclick="openQA('ode')">💳 Temassız Öde</button>
+  <button class="pc pc-loyalty" onclick="openMemberLogin()" style="grid-column:1/-1">⭐ Üye Olanlar Her Siparişinde İndirim Kazanıyor!</button>
 </div>
 
 <!-- ══ CATS ══ -->
@@ -527,14 +543,7 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
 .gr-toast-close{width:100%;height:46px;border:none;border-radius:13px;background:linear-gradient(135deg,#166534,#16a34a);color:#fff;font-family:'Figtree';font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.2px}
 </style>
 
-<div class="gr-toast-overlay" id="grToast" onclick="if(event.target===this)closeGrToast()">
-  <div class="gr-toast">
-    <span class="gr-toast-icon">✅</span>
-    <h3>Hemen geliyor</h3>
-    <div class="gr-toast-masa">🛎 Masa <span id="grToastMasa">7</span></div>
-    <button class="gr-toast-close" onclick="closeGrToast()">Tamam</button>
-  </div>
-</div>
+
 
 <!-- VALE ÇAĞIR MODAL -->
 <style>
@@ -924,6 +933,185 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
 .ode-cta{width:100%;height:52px;border:none;border-radius:16px;background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;font-family:'Figtree';font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.2px}
 .ode-cta:active{transform:scale(.97)}
 </style>
+<style>
+/* LOYALTY MODAL */
+@keyframes loy-shine{0%{background-position:200% center}100%{background-position:-200% center}}
+@keyframes loy-float{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+@keyframes loy-pulse-ring{0%{box-shadow:0 0 0 0 rgba(250,204,21,.5)}100%{box-shadow:0 0 0 18px rgba(250,204,21,0)}}
+@keyframes loy-card-in{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+#qaLoyalty .qa-sheet{background:#0c0a00;padding:0;border-top:2px solid rgba(250,204,21,.35);border-radius:28px 28px 0 0}
+.loy-scroll{overflow-y:auto;max-height:90vh;padding-bottom:40px}
+.loy-banner{position:relative;overflow:hidden;padding:24px 20px 22px;background:linear-gradient(160deg,#1a1200,#251900,#0c0a00);border-bottom:1px solid rgba(250,204,21,.1)}
+.loy-banner-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 90% 50%,rgba(250,204,21,.14),transparent);pointer-events:none}
+.loy-banner-coin{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:52px;animation:loy-float 4s ease-in-out infinite;filter:drop-shadow(0 0 16px rgba(250,204,21,.7))}
+.loy-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(90deg,#F59E0B,#FACC15);color:#000;font-size:9px;font-weight:900;padding:3px 10px;border-radius:20px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px}
+.loy-banner h2{font-size:24px;font-weight:900;line-height:1.15;letter-spacing:-.4px;background:linear-gradient(100deg,#FACC15,#FDE68A,#F59E0B,#FACC15);background-size:250% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:loy-shine 4s linear infinite;margin-bottom:5px}
+.loy-banner p{font-size:12px;color:rgba(255,255,255,.4);line-height:1.55;margin:0;max-width:200px}
+.loy-perks-wrap{padding:20px 0 4px}
+.loy-section-head{display:flex;align-items:center;gap:8px;padding:0 20px;margin-bottom:12px}
+.loy-section-head-line{flex:1;height:1px;background:rgba(255,255,255,.07)}
+.loy-section-head span{font-size:9px;font-weight:800;color:rgba(255,255,255,.25);letter-spacing:1.5px;white-space:nowrap}
+.loy-perks-scroll{display:flex;gap:10px;overflow-x:auto;padding:4px 20px 12px;scrollbar-width:none}
+.loy-perks-scroll::-webkit-scrollbar{display:none}
+.loy-perk-card{flex-shrink:0;width:105px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px 10px 13px;text-align:center;position:relative;overflow:hidden;animation:loy-card-in .45s cubic-bezier(.34,1.3,.64,1) both;transition:transform .2s}
+.loy-perk-card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(250,204,21,.5),transparent)}
+.loy-perk-card:nth-child(1){animation-delay:.05s}.loy-perk-card:nth-child(2){animation-delay:.12s}.loy-perk-card:nth-child(3){animation-delay:.19s}.loy-perk-card:nth-child(4){animation-delay:.26s}.loy-perk-card:nth-child(5){animation-delay:.33s}
+.loy-perk-card:active{transform:scale(.95)}
+.loy-perk-emoji-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:26px}
+.loy-perk-card:nth-child(1) .loy-perk-emoji-wrap{background:rgba(250,204,21,.12)}
+.loy-perk-card:nth-child(2) .loy-perk-emoji-wrap{background:rgba(251,146,60,.12)}
+.loy-perk-card:nth-child(3) .loy-perk-emoji-wrap{background:rgba(167,139,250,.12)}
+.loy-perk-card:nth-child(4) .loy-perk-emoji-wrap{background:rgba(244,114,182,.12)}
+.loy-perk-card:nth-child(5) .loy-perk-emoji-wrap{background:rgba(56,189,248,.12)}
+.loy-perk-title{font-size:11px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:4px}
+.loy-perk-sub{font-size:9.5px;color:rgba(255,255,255,.35);line-height:1.4}
+.loy-form-section{padding:4px 20px 0}
+.loy-input-wrap{position:relative;margin-bottom:10px}
+.loy-input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.loy-input{width:100%;height:50px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;color:#fff;font-family:'Figtree';font-size:15px;font-weight:600;padding:0 16px 0 42px;outline:none;box-sizing:border-box;transition:.2s}
+.loy-input:focus{border-color:rgba(250,204,21,.5);background:rgba(250,204,21,.04)}
+.loy-input::placeholder{color:rgba(255,255,255,.2)}
+.loy-social-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.loy-social-btn{height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:rgba(255,255,255,.7);font-family:'Figtree';font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s}
+.loy-social-btn.done{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.35);color:#4ADE80}
+.loy-social-btn:active{transform:scale(.96)}
+.loy-cta{width:100%;height:54px;border:none;border-radius:16px;background:linear-gradient(135deg,#78350f,#b45309,#FACC15,#b45309,#78350f);background-size:300% auto;color:#000;font-family:'Figtree';font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.3px;box-shadow:0 0 24px rgba(250,204,21,.2),0 4px 16px rgba(0,0,0,.4);transition:.35s}
+.loy-cta:hover{background-position:right center}.loy-cta:active{transform:scale(.97)}
+.loy-success{text-align:center;padding:36px 20px 10px}
+.loy-success-ring{width:88px;height:88px;border-radius:50%;background:rgba(250,204,21,.08);border:2px solid rgba(250,204,21,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:44px;animation:loy-pulse-ring 1.8s ease-in-out infinite}
+.loy-success h3{font-size:22px;font-weight:900;margin-bottom:8px;background:linear-gradient(90deg,#FACC15,#FDE68A);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.loy-success p{font-size:13px;color:rgba(255,255,255,.4);line-height:1.7;margin-bottom:24px}
+.loy-success-close{width:100%;height:50px;border:none;border-radius:14px;background:linear-gradient(135deg,#b45309,#FACC15);color:#000;font-family:'Figtree';font-size:14px;font-weight:900;cursor:pointer;transition:.15s}
+.loy-success-close:active{transform:scale(.97)}
+</style>
+<style>
+/* ── MEMBER LOGIN MODAL ── */
+@keyframes ml-in{0%{opacity:0;transform:scale(.96) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes ml-shine{0%{background-position:200% center}100%{background-position:-200% center}}
+@keyframes ml-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.ml-overlay{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.85);
+  backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
+.ml-overlay.show{display:flex}
+.ml-card{
+  width:100%;max-width:360px;
+  background:linear-gradient(160deg,#0e0a00,#111111);
+  border:1px solid rgba(250,204,21,.2);
+  border-radius:28px;overflow:hidden;
+  animation:ml-in .35s cubic-bezier(.34,1.2,.64,1) both;
+  position:relative;
+}
+.ml-top{
+  position:relative;overflow:hidden;
+  padding:32px 24px 28px;
+  background:linear-gradient(160deg,#1c1500,#251900);
+  border-bottom:1px solid rgba(250,204,21,.1);
+  text-align:center;
+}
+.ml-top-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 100% 100% at 50% 100%,rgba(250,204,21,.1),transparent);
+}
+.ml-logo{
+  font-size:48px;margin-bottom:4px;display:block;
+  animation:ml-float 3s ease-in-out infinite;
+  filter:drop-shadow(0 0 14px rgba(250,204,21,.6));
+}
+.ml-badge{
+  display:inline-block;background:linear-gradient(90deg,#F59E0B,#FACC15);
+  color:#000;font-size:9px;font-weight:900;
+  padding:3px 12px;border-radius:20px;letter-spacing:1.2px;
+  text-transform:uppercase;margin-bottom:12px;
+}
+.ml-top h2{
+  font-size:22px;font-weight:900;letter-spacing:-.3px;
+  background:linear-gradient(90deg,#FACC15,#FDE68A,#FACC15);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:ml-shine 3s linear infinite;
+  margin-bottom:4px;
+}
+.ml-top p{font-size:12px;color:rgba(255,255,255,.4);margin:0}
+
+.ml-tabs{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.ml-tab{
+  padding:13px;text-align:center;font-family:'Figtree';
+  font-size:13px;font-weight:800;color:rgba(255,255,255,.3);
+  background:none;border:none;cursor:pointer;
+  border-bottom:2px solid transparent;transition:.2s;
+}
+.ml-tab.active{color:#FACC15;border-bottom-color:#FACC15}
+
+.ml-body{padding:22px 22px 26px}
+
+/* GİRİŞ PANELİ */
+.ml-panel{display:none}
+.ml-panel.show{display:block}
+
+.ml-input-wrap{position:relative;margin-bottom:11px}
+.ml-input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.ml-input{
+  width:100%;height:50px;
+  background:rgba(255,255,255,.05);
+  border:1.5px solid rgba(255,255,255,.08);
+  border-radius:14px;color:#fff;
+  font-family:'Figtree';font-size:15px;font-weight:600;
+  padding:0 16px 0 42px;outline:none;box-sizing:border-box;
+  transition:.2s;
+}
+.ml-input:focus{border-color:rgba(250,204,21,.5);background:rgba(250,204,21,.04)}
+.ml-input::placeholder{color:rgba(255,255,255,.2)}
+
+.ml-cta{
+  width:100%;height:52px;border:none;border-radius:15px;
+  background:linear-gradient(135deg,#78350f,#b45309,#FACC15,#b45309,#78350f);
+  background-size:300% auto;
+  color:#000;font-family:'Figtree';font-size:15px;font-weight:900;
+  cursor:pointer;margin-top:4px;
+  box-shadow:0 0 20px rgba(250,204,21,.2);
+  transition:.35s;
+}
+.ml-cta:hover{background-position:right center}
+.ml-cta:active{transform:scale(.97)}
+
+.ml-close{
+  position:absolute;top:14px;right:14px;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:none;
+  color:#fff;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:.15s;z-index:2;
+}
+.ml-close:hover{background:rgba(255,255,255,.15)}
+
+.ml-hint{text-align:center;font-size:11px;color:rgba(255,255,255,.25);margin-top:12px}
+.ml-hint span{color:#FACC15;cursor:pointer;font-weight:700}
+
+/* GİRİŞ BAŞARILI */
+.ml-welcome{text-align:center;padding:8px 0 4px}
+.ml-welcome-icon{font-size:48px;margin-bottom:12px;display:block}
+.ml-welcome h3{font-size:20px;font-weight:900;margin-bottom:6px;
+  background:linear-gradient(90deg,#FACC15,#FDE68A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ml-welcome p{font-size:12px;color:rgba(255,255,255,.4);line-height:1.6;margin-bottom:18px}
+.ml-ref-box{
+  background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.25);
+  border-radius:12px;padding:12px 16px;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ml-ref-label{font-size:10px;color:rgba(255,255,255,.4);font-weight:700;letter-spacing:.5px}
+.ml-ref-code{font-size:20px;font-weight:900;color:#FACC15;letter-spacing:3px}
+</style>
+
+
 <div class="qa-modal" id="qaOde" onclick="if(event.target===this)closeQA('ode')">
   <div class="ode-sheet">
     <div class="ode-handle"></div>
@@ -1016,6 +1204,14 @@ body{background:#111;color:#fff;font-family:'Figtree',sans-serif;min-height:100v
 
 <div class="toast" id="toastEl"></div>
 
+<div class="gr-toast-overlay" id="grToast" onclick="if(event.target===this)closeGrToast()">
+  <div class="gr-toast">
+    <span class="gr-toast-icon">✅</span>
+    <h3>Hemen geliyor</h3>
+    <div class="gr-toast-masa">🛎 Masa <span id="grToastMasa">7</span></div>
+    <button class="gr-toast-close" onclick="closeGrToast()">Tamam</button>
+  </div>
+</div>
 <script>
 // ── BUSINESS HOURS ──
 const OPEN_H=11, OPEN_M=30, CLOSE_H=23, CLOSE_M=45;
@@ -1189,6 +1385,37 @@ setInterval(()=>{ITEMS=getItems();renderMenu()},5000);
 
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',renderMenu);}else{renderMenu();}
 window.addEventListener('load', function(){ if(!document.getElementById('productList').innerHTML) renderMenu(); });
+
+// ── HERO SLIDER ──
+(function(){
+  var slides=[
+    {img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=85&auto=format&fit=crop',tag:'🔥 Günün Önerisi',title:'El Yapımı<br>Smash Burger',sub:'Taze · Sıcak · Lezzetli'},
+    {img:'https://images.unsplash.com/photo-1513442542250-854d436a73f2?w=900&q=85&auto=format&fit=crop',tag:'🧇 Öne Çıkan',title:'Tatlı<br>Waffle',sub:'Ev Yapımı · Sıcak · Taze'},
+    {img:'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=900&q=85&auto=format&fit=crop',tag:'🍕 Favoriler',title:'Çıtır<br>Pizza',sub:'Odun Fırını · Bol Malzeme'},
+    {img:'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=900&q=85&auto=format&fit=crop',tag:'🥔 Klasik Lezzet',title:'ATOM<br>Kumpir',sub:'Özel Sos · Tam Doyum'}
+  ];
+  var cur=0,track=document.getElementById('heroTrack'),dotsEl=document.getElementById('heroDots');
+  var tagEl=document.getElementById('heroTag'),titleEl=document.getElementById('heroTitle'),subEl=document.getElementById('heroSub');
+
+  // build dots
+  slides.forEach(function(_,i){
+    var d=document.createElement('span');
+    d.className='hero-dot'+(i===0?' active':'');
+    d.onclick=function(){goTo(i)};
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n){
+    cur=n;
+    track.style.transform='translateX(-'+cur*100+'%)';
+    document.querySelectorAll('.hero-dot').forEach(function(d,i){d.classList.toggle('active',i===cur)});
+    tagEl.textContent=slides[cur].tag;
+    titleEl.innerHTML=slides[cur].title;
+    subEl.textContent=slides[cur].sub;
+  }
+
+  setInterval(function(){goTo((cur+1)%slides.length)},3000);
+})();
 // Show NFC after closed check (only if open)
 setTimeout(()=>{if(isBusinessOpen)document.getElementById('nfcOvl').classList.add('show')},600);
 
@@ -1256,6 +1483,87 @@ function closeGrToast(){
   document.getElementById('grToast').classList.remove('show');
 }
 
+var loyIgDone = false, loyShareDone = false;
+function loyaltyIG(){
+  window.open('https://www.instagram.com/atom_kumpir_waffle/', '_blank');
+  loyIgDone = true;
+  document.getElementById('loyIgBtn').className = 'loy-social-btn done';
+  document.getElementById('loyIgBtn').innerHTML = '<span>✅</span> Takip Edildi';
+}
+function loyaltyShare(){
+  var text = 'ATOM Kumpir & Burger & Waffle — Kartal\u2019da lezzetin adresi! 🍔🧇 ' + window.location.href;
+  if(navigator.share){ navigator.share({title:'ATOM MENU', text:text}); }
+  else { window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); }
+  loyShareDone = true;
+  document.getElementById('loyShareBtn').className = 'loy-social-btn done';
+  document.getElementById('loyShareBtn').innerHTML = '<span>✅</span> Paylaşıldı';
+}
+function sendLoyalty(){
+  var ad = document.getElementById('loyAd').value.trim();
+  var soyad = document.getElementById('loySoyad').value.trim();
+  var tel = document.getElementById('loyTel').value.trim();
+  if(!ad){ document.getElementById('loyAd').focus(); return; }
+  if(!soyad){ document.getElementById('loySoyad').focus(); return; }
+  if(!tel){ document.getElementById('loyTel').focus(); return; }
+  var refCode = genRefCode(ad);
+  var waMsg = '⭐ ATOM CLUB ÜYELİK BAŞVURUSU'
+    + '\nAd Soyad: ' + ad + ' ' + soyad
+    + '\nTelefon: ' + tel
+    + '\nReferans Kodu: ' + refCode
+    + '\nInstagram Takip: ' + (loyIgDone ? '✅ Evet' : '❌ Hayır')
+    + '\nPaylaşım: ' + (loyShareDone ? '✅ Evet' : '❌ Hayır');
+  window.open('https://wa.me/' + GARSON_WA + '?text=' + encodeURIComponent(waMsg), '_blank');
+  document.getElementById('loyForm').style.display = 'none';
+  document.getElementById('loySuccess').style.display = 'block';
+  loyIgDone = false; loyShareDone = false;
+}
+
+function openMemberLogin(){
+  document.getElementById('mlOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeMemberLogin(){
+  document.getElementById('mlOverlay').classList.remove('show');
+  document.body.style.overflow='';
+}
+function switchMlTab(tab){
+  document.getElementById('mlTabLogin').className = 'ml-tab' + (tab==='login' ? ' active' : '');
+  document.getElementById('mlTabRegister').className = 'ml-tab' + (tab==='register' ? ' active' : '');
+  document.getElementById('mlPanelLogin').className = 'ml-panel' + (tab==='login' ? ' show' : '');
+  document.getElementById('mlPanelRegister').className = 'ml-panel' + (tab==='register' ? ' show' : '');
+  document.getElementById('mlPanelWelcome').className = 'ml-panel';
+}
+function doMemberLogin(){
+  var tel = document.getElementById('mlLoginTel').value.trim();
+  if(!tel){ document.getElementById('mlLoginTel').focus(); return; }
+  var waMsg = '⭐ ÜYE GİRİŞİ\nTelefon: ' + tel;
+  window.open('https://wa.me/' + GARSON_WA + '?text=' + encodeURIComponent(waMsg), '_blank');
+  document.getElementById('mlWelcomeName').textContent = 'Hoş Geldin!';
+  document.getElementById('mlRefCode').textContent = '—';
+  document.getElementById('mlPanelLogin').className = 'ml-panel';
+  document.getElementById('mlPanelWelcome').className = 'ml-panel show';
+}
+function doMemberRegister(){
+  var ad = document.getElementById('mlRegAd').value.trim();
+  var soyad = document.getElementById('mlRegSoyad').value.trim();
+  var tel = document.getElementById('mlRegTel').value.trim();
+  if(!ad){ document.getElementById('mlRegAd').focus(); return; }
+  if(!soyad){ document.getElementById('mlRegSoyad').focus(); return; }
+  if(!tel){ document.getElementById('mlRegTel').focus(); return; }
+  var refCode = genRefCode(ad);
+  var waMsg = '⭐ ATOM CLUB YENİ ÜYELİK'
+    + '\nAd Soyad: ' + ad + ' ' + soyad
+    + '\nTelefon: ' + tel
+    + '\nReferans Kodu: ' + refCode;
+  window.open('https://wa.me/' + GARSON_WA + '?text=' + encodeURIComponent(waMsg), '_blank');
+  document.getElementById('mlWelcomeName').textContent = 'Hoş Geldin, ' + ad + '!';
+  document.getElementById('mlRefCode').textContent = refCode;
+  document.getElementById('mlPanelRegister').className = 'ml-panel';
+  document.getElementById('mlTabLogin').className = 'ml-tab';
+  document.getElementById('mlTabRegister').className = 'ml-tab';
+  document.getElementById('mlPanelWelcome').className = 'ml-panel show';
+}
+
 function sendVale(){
   const plaka = document.getElementById('valePlaka').value.toUpperCase();
   const not   = document.getElementById('valeNot').value;
@@ -1270,5 +1578,187 @@ function sendVale(){
 
 </script>
 <script>renderMenu();</script>
+
+
+<!-- LOYALTY MODAL -->
+<div class="qa-modal" id="qaLoyalty" onclick="if(event.target===this)closeQA('loyalty')">
+  <div class="qa-sheet">
+    <div class="qa-handle" style="margin:14px auto 0"></div>
+    <div class="loy-scroll">
+
+      <!-- BANNER -->
+      <div class="loy-banner">
+        <div class="loy-banner-bg"></div>
+        <div class="loy-banner-coin">🪙</div>
+        <div class="loy-badge">🏆 ATOM CLUB</div>
+        <h2>Para Puan<br>Kazan!</h2>
+        <p>Her siparişinde puan biriktir,<br>avantajlardan yararlan.</p>
+      </div>
+
+      <div id="loyForm">
+
+        <!-- AVANTAJ KARTLARI -->
+        <div class="loy-perks-wrap">
+          <div class="loy-section-head">
+            <div class="loy-section-head-line"></div>
+            <span>ÜYELİK AVANTAJLARI</span>
+            <div class="loy-section-head-line"></div>
+          </div>
+          <div class="loy-perks-scroll">
+            <div class="loy-perk-card">
+              <div class="loy-perk-emoji-wrap">💰</div>
+              <div class="loy-perk-title">500₺+ Sipariş</div>
+              <div class="loy-perk-sub">Her siparişte puan kazan</div>
+            </div>
+            <div class="loy-perk-card">
+              <div class="loy-perk-emoji-wrap">🎁</div>
+              <div class="loy-perk-title">10. Sipariş</div>
+              <div class="loy-perk-sub">Sürpriz ikram hediye!</div>
+            </div>
+            <div class="loy-perk-card">
+              <div class="loy-perk-emoji-wrap">👫</div>
+              <div class="loy-perk-title">Arkadaşını Getir</div>
+              <div class="loy-perk-sub">İkinize özel indirim</div>
+            </div>
+            <div class="loy-perk-card">
+              <div class="loy-perk-emoji-wrap">🎂</div>
+              <div class="loy-perk-title">Doğum Günü</div>
+              <div class="loy-perk-sub">Sana sürpriz hediye</div>
+            </div>
+            <div class="loy-perk-card">
+              <div class="loy-perk-emoji-wrap">📱</div>
+              <div class="loy-perk-title">Online Sipariş</div>
+              <div class="loy-perk-sub">Ekstra puan kazan</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORM -->
+        <div class="loy-form-section">
+          <div class="loy-section-head" style="margin-bottom:14px">
+            <div class="loy-section-head-line"></div>
+            <span>ÜCRETSİZ KAYIT</span>
+            <div class="loy-section-head-line"></div>
+          </div>
+          <div class="loy-input-wrap">
+            <span class="loy-input-icon">👤</span>
+            <input class="loy-input" id="loyAd" type="text" placeholder="Adınız">
+          </div>
+          <div class="loy-input-wrap">
+            <span class="loy-input-icon">👤</span>
+            <input class="loy-input" id="loySoyad" type="text" placeholder="Soyadınız">
+          </div>
+          <div class="loy-input-wrap">
+            <span class="loy-input-icon">📱</span>
+            <input class="loy-input" id="loyTel" type="tel" placeholder="Telefon Numaranız">
+          </div>
+
+          <div class="loy-social-row">
+            <button class="loy-social-btn" id="loyIgBtn" onclick="loyaltyIG()">
+              <span>📸</span> Instagram Takip
+            </button>
+            <button class="loy-social-btn" id="loyShareBtn" onclick="loyaltyShare()">
+              <span>🔗</span> Referans Paylaş
+            </button>
+          </div>
+          <button class="loy-social-btn" id="loyPhotoBtn" onclick="loyaltyPhoto()" style="width:100%;margin-bottom:0">
+            <span>📷</span> Yemeğini Paylaş, Bizi Etiketle @atom_kumpir_waffle
+          </button>
+
+          <button class="loy-cta" onclick="sendLoyalty()">⭐ Üyeliği Tamamla</button>
+        </div>
+      </div>
+
+      <!-- BAŞARI -->
+      <div id="loySuccess" style="display:none">
+        <div class="loy-success">
+          <div class="loy-success-ring">🏆</div>
+          <h3>Hoş Geldin<br>ATOM Club!</h3>
+          <div id="loyRefWrap" style="display:none;align-items:center;justify-content:center;gap:8px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.3);border-radius:12px;padding:10px 16px;margin-bottom:14px">
+            <span style="font-size:12px;color:rgba(255,255,255,.5);font-weight:700">Referans Kodun:</span>
+            <span id="loyRefBadge" style="font-size:18px;font-weight:900;color:#FACC15;letter-spacing:2px"></span>
+          </div>
+          <p>Üyeliğin işletmeye iletildi.<br>Arkadaşını getir, kodunu söyle,<br>ikisine de indirim!</p>
+          <button class="loy-success-close" onclick="closeQA('loyalty');document.getElementById('loySuccess').style.display='none';document.getElementById('loyForm').style.display='block'">Harika, Teşekkürler 🙌</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- MEMBER LOGIN MODAL -->
+<div class="ml-overlay" id="mlOverlay" onclick="if(event.target===this)closeMemberLogin()">
+  <div class="ml-card">
+    <button class="ml-close" onclick="closeMemberLogin()">✕</button>
+
+    <!-- TOP -->
+    <div class="ml-top">
+      <div class="ml-top-bg"></div>
+      <span class="ml-logo">⭐</span>
+      <div class="ml-badge">🏆 ATOM CLUB</div>
+      <h2>Hoş Geldin!</h2>
+      <p>Üye girişi yap veya yeni üye ol</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="ml-tabs">
+      <button class="ml-tab active" id="mlTabLogin" onclick="switchMlTab('login')">Giriş Yap</button>
+      <button class="ml-tab" id="mlTabRegister" onclick="switchMlTab('register')">Üye Ol</button>
+    </div>
+
+    <!-- BODY -->
+    <div class="ml-body">
+
+      <!-- GİRİŞ PANELİ -->
+      <div class="ml-panel show" id="mlPanelLogin">
+        <div class="ml-input-wrap">
+          <span class="ml-input-icon">📱</span>
+          <input class="ml-input" id="mlLoginTel" type="tel" placeholder="Telefon Numaranız">
+        </div>
+        <button class="ml-cta" onclick="doMemberLogin()">⭐ Giriş Yap</button>
+        <div class="ml-hint">Hesabın yok mu? <span onclick="switchMlTab('register')">Hemen üye ol</span></div>
+      </div>
+
+      <!-- KAYIT PANELİ -->
+      <div class="ml-panel" id="mlPanelRegister">
+        <div class="ml-input-wrap">
+          <span class="ml-input-icon">👤</span>
+          <input class="ml-input" id="mlRegAd" type="text" placeholder="Adınız">
+        </div>
+        <div class="ml-input-wrap">
+          <span class="ml-input-icon">👤</span>
+          <input class="ml-input" id="mlRegSoyad" type="text" placeholder="Soyadınız">
+        </div>
+        <div class="ml-input-wrap">
+          <span class="ml-input-icon">📱</span>
+          <input class="ml-input" id="mlRegTel" type="tel" placeholder="Telefon Numaranız">
+        </div>
+        <button class="ml-cta" onclick="doMemberRegister()">🏆 Üyeliği Tamamla</button>
+        <div class="ml-hint">Zaten üye misin? <span onclick="switchMlTab('login')">Giriş yap</span></div>
+      </div>
+
+      <!-- HOŞ GELDİN PANELİ -->
+      <div class="ml-panel" id="mlPanelWelcome">
+        <div class="ml-welcome">
+          <span class="ml-welcome-icon">🎉</span>
+          <h3 id="mlWelcomeName">Hoş Geldin!</h3>
+          <div class="ml-ref-box">
+            <div>
+              <div class="ml-ref-label">REFERANS KODUN</div>
+              <div class="ml-ref-code" id="mlRefCode">—</div>
+            </div>
+            <span style="font-size:24px">🏷</span>
+          </div>
+          <p>Arkadaşını getir, kodunu söyle,<br>ikisine de indirim!</p>
+          <button class="ml-cta" onclick="closeMemberLogin()">Alışverişe Devam Et 🍔</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
